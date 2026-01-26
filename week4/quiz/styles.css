@@ -1,0 +1,131 @@
+body {
+    margin: 0;
+    background: linear-gradient(135deg, #22092C, #872341);
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #FCEEF0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 30px;
+}
+
+.quizContainer {
+    width: 100%;
+    max-width: 450px;
+}
+
+.startScreen,
+.quizScreen,
+.resultScreen,
+.leaderboardScreen {
+    background: #380F2F;
+    padding: 28px;
+    border-radius: 16px;
+    display: none;
+    box-shadow: 0 8px 26px rgba(0,0,0,0.6);
+}
+
+.quizTitle {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.primaryBtn,
+.secondaryBtn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 14px;
+    font-weight: bold;
+    border: none;
+}
+
+.primaryBtn {
+    background: linear-gradient(135deg, #BE3144, #F05941);
+    color: white;
+}
+
+.secondaryBtn {
+    background: #872341;
+    color: #FCEEF0;
+}
+
+.selectGroup label {
+    display: block;
+    margin-top: 12px;
+    margin-bottom: 4px;
+}
+
+.selectInput {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #872341;
+    background: #22092C;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.quizHeader {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.timerBox {
+    background: #BE3144;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.questionText {
+    margin-bottom: 18px;
+    font-size: 20px;
+}
+
+.optionsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.optionBtn {
+    background: #872341;
+    padding: 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    border: 1px solid #BE3144;
+    text-align: left;
+    font-size: 16px;
+}
+
+.optionBtn.selected {
+    background: #F05941;
+}
+
+.textInput {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    background: #22092C;
+    color: white;
+    border: 1px solid #872341;
+    margin-bottom: 14px;
+}
+
+.leaderboardList {
+    list-style: none;
+    padding: 0;
+}
+
+.leaderboardList li {
+    background: #872341;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+}

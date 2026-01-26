@@ -1,0 +1,25 @@
+{
+    "employees": [
+        {
+            "name": "Monkey D. Luffy",
+            "designation": "Senior Developer",
+            "experience": "6 Years",
+            "project": "Enterprise Automation",
+            "photo": "images/luffy.jpg"
+        },
+        {
+            "name": "Itachi Uchiha",
+            "designation": "UI/UX Designer",
+            "experience": "4 Years",
+            "project": "Customer Portal Redesign",
+            "photo": "images/itachi.jpg"
+        },
+        {
+            "name": "Roronoa Zoro",
+            "designation": "Cloud Architect",
+            "experience": "8 Years",
+            "project": "AWS Migration Suite",
+            "photo": "images/zoro.webp"
+        }
+    ]
+}
