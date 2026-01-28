@@ -15,6 +15,7 @@ const viewLeaderboardBtn = document.getElementById("viewLeaderboardBtn") as HTML
 const saveScoreBtn = document.getElementById("saveScoreBtn") as HTMLButtonElement
 const restartBtn = document.getElementById("restartBtn") as HTMLButtonElement
 const backToStartBtn = document.getElementById("backToStartBtn") as HTMLButtonElement
+const resultViewLeaderboardBtn = document.getElementById("resultViewLeaderboardBtn") as HTMLButtonElement;
 
 const categorySelect = document.getElementById("categorySelect") as HTMLSelectElement
 const difficultySelect = document.getElementById("difficultySelect") as HTMLSelectElement
@@ -25,7 +26,6 @@ const progressText = document.getElementById("progressText") as HTMLElement
 const timerBox = document.getElementById("timerBox") as HTMLElement
 
 const scoreText = document.getElementById("scoreText") as HTMLElement
-const playerNameInput = document.getElementById("playerNameInput") as HTMLInputElement
 const leaderboardList = document.getElementById("leaderboardList") as HTMLElement
 
 let questionSet: Question[] = []
@@ -114,20 +114,32 @@ function evaluateAnswer(): void {
 }
 
 function endQuiz(): void {
-    quizScreen.style.display = "none"
-    resultScreen.style.display = "block"
-    scoreText.textContent = `You scored ${currentScore} out of ${questionSet.length}`
+    quizScreen.style.display = "none";
+    resultScreen.style.display = "block";
+
+    scoreText.textContent = `You scored ${currentScore} out of ${questionSet.length}`;
+
+    saveScoreBtn.style.display = "block";
+    resultViewLeaderboardBtn.style.display = "none";
 }
 
 saveScoreBtn.onclick = () => {
-    const name = playerNameInput.value.trim()
-    if (!name) return
+    const loggedInUser = localStorage.getItem("loggedInUser");
 
-    saveScoreToLeaderboard(name, currentScore)
-    showLeaderboard()
-}
+    if (!loggedInUser) {
+        alert("User is not logged in.");
+        return;
+    }
 
-viewLeaderboardBtn.onclick = () => showLeaderboard()
+    saveScoreToLeaderboard(loggedInUser, currentScore);
+
+    saveScoreBtn.style.display = "none";
+    resultViewLeaderboardBtn.style.display = "block";
+
+    showLeaderboard();
+};
+
+resultViewLeaderboardBtn.onclick = () => showLeaderboard();
 
 backToStartBtn.onclick = () => {
     leaderboardScreen.style.display = "none"

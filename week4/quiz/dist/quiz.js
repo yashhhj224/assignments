@@ -1,16 +1,20 @@
 import { quizPool } from "./questions.js";
 import { saveScoreToLeaderboard, loadLeaderboard } from "./leaderboard.js";
+
 const startScreen = document.getElementById("startScreen");
 const quizScreen = document.getElementById("quizScreen");
 const resultScreen = document.getElementById("resultScreen");
 const leaderboardScreen = document.getElementById("leaderboardScreen");
 startScreen.style.display = "block";
+
 const startBtn = document.getElementById("startBtn");
 const nextBtn = document.getElementById("nextBtn");
 const viewLeaderboardBtn = document.getElementById("viewLeaderboardBtn");
 const saveScoreBtn = document.getElementById("saveScoreBtn");
 const restartBtn = document.getElementById("restartBtn");
 const backToStartBtn = document.getElementById("backToStartBtn");
+const resultViewLeaderboardBtn = document.getElementById("resultViewLeaderboardBtn");
+
 const categorySelect = document.getElementById("categorySelect");
 const difficultySelect = document.getElementById("difficultySelect");
 const questionText = document.getElementById("questionText");
@@ -18,13 +22,14 @@ const optionsContainer = document.getElementById("optionsContainer");
 const progressText = document.getElementById("progressText");
 const timerBox = document.getElementById("timerBox");
 const scoreText = document.getElementById("scoreText");
-const playerNameInput = document.getElementById("playerNameInput");
 const leaderboardList = document.getElementById("leaderboardList");
+
 let questionSet = [];
 let currentQuestionIndex = 0;
 let currentScore = 0;
 let selectedOption = null;
 let quizTimer;
+
 startBtn.onclick = () => {
     const selectedCategory = categorySelect.value;
     const selectedDifficulty = difficultySelect.value;
@@ -38,6 +43,7 @@ startBtn.onclick = () => {
     quizScreen.style.display = "block";
     loadQuestion();
 };
+
 function loadQuestion() {
     clearInterval(quizTimer);
     selectedOption = null;
@@ -58,6 +64,7 @@ function loadQuestion() {
     });
     startTimer();
 }
+
 function startTimer() {
     let timeLeft = 10;
     timerBox.textContent = String(timeLeft);
@@ -70,7 +77,9 @@ function startTimer() {
         }
     }, 1000);
 }
+
 nextBtn.onclick = () => evaluateAnswer();
+
 function evaluateAnswer() {
     clearInterval(quizTimer);
     if (selectedOption === questionSet[currentQuestionIndex].answer) {
@@ -84,27 +93,38 @@ function evaluateAnswer() {
         loadQuestion();
     }
 }
+
 function endQuiz() {
     quizScreen.style.display = "none";
     resultScreen.style.display = "block";
     scoreText.textContent = `You scored ${currentScore} out of ${questionSet.length}`;
+    saveScoreBtn.style.display = "block";
+    resultViewLeaderboardBtn.style.display = "none";
 }
+
 saveScoreBtn.onclick = () => {
-    const name = playerNameInput.value.trim();
-    if (!name)
+    const loggedInUser = localStorage.getItem("loggedInUser");
+    if (!loggedInUser) {
+        alert("User is not logged in.");
         return;
-    saveScoreToLeaderboard(name, currentScore);
+    }
+    saveScoreToLeaderboard(loggedInUser, currentScore);
+    saveScoreBtn.style.display = "none";
+    resultViewLeaderboardBtn.style.display = "block";
     showLeaderboard();
 };
-viewLeaderboardBtn.onclick = () => showLeaderboard();
+
+resultViewLeaderboardBtn.onclick = () => showLeaderboard();
 backToStartBtn.onclick = () => {
     leaderboardScreen.style.display = "none";
     startScreen.style.display = "block";
 };
+
 restartBtn.onclick = () => {
     resultScreen.style.display = "none";
     startScreen.style.display = "block";
 };
+
 function showLeaderboard() {
     leaderboardList.innerHTML = "";
     const list = loadLeaderboard();
