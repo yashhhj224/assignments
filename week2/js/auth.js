@@ -21,14 +21,23 @@ document.getElementById("registerBtn").onclick = () => {
     }
 
     if (password.length < 6 || password.length > 16) {
-        alert("Password must be between 6 and 10 characters.");
+        alert("Password must be between 6 and 16 characters.");
         return;
     }
 
-    localStorage.setItem("registeredUser", JSON.stringify({ username, password }));
+    let users = JSON.parse(localStorage.getItem("registeredUsers")) || [];
+
+    for (let user of users) {
+        if (user.username === username) {
+            alert("Username already exists. Choose a different one.");
+            return;
+        }
+    }
+
+    users.push({ username, password });
+    localStorage.setItem("registeredUsers", JSON.stringify(users));
 
     alert("Registration successful. Please login.");
-
     registerBox.classList.add("hidden");
     loginBox.classList.remove("hidden");
 };
@@ -37,17 +46,20 @@ document.getElementById("loginBtn").onclick = () => {
     const username = document.getElementById("loginUsername").value.trim();
     const password = document.getElementById("loginPassword").value.trim();
 
-    const stored = JSON.parse(localStorage.getItem("registeredUser"));
+    let users = JSON.parse(localStorage.getItem("registeredUsers")) || [];
 
-    if (!stored) {
-        alert("No registered user found. Please register first.");
-        return;
+    let found = false;
+
+    for (let user of users) {
+        if (user.username === username && user.password === password) {
+            found = true;
+            localStorage.setItem("loggedInUser", username);
+            window.location.href = "welcome.html";
+            break;
+        }
     }
 
-    if (username === stored.username && password === stored.password) {
-        localStorage.setItem("loggedInUser", username);   // session key
-        window.location.href = "welcome.html";
-    } else {
+    if (!found) {
         alert("Incorrect username or password.");
     }
 };
