@@ -48,18 +48,28 @@ document.getElementById("loginBtn").onclick = () => {
 
     let users = JSON.parse(localStorage.getItem("registeredUsers")) || [];
 
-    let found = false;
+    let foundUsername = false;
+    let foundPassword = false;
 
     for (let user of users) {
         if (user.username === username && user.password === password) {
-            found = true;
+            foundUsername = true;
+            foundPassword = true;
             localStorage.setItem("loggedInUser", username);
             window.location.href = "welcome.html";
+            break;
+        } else if (user.username === username && user.password !== password) {
+            foundUsername = true;
+            foundPassword = false;
             break;
         }
     }
 
-    if (!found) {
-        alert("Incorrect username or password.");
+    if (foundUsername && !foundPassword) {
+        alert("Incorrect password. Please try again!");
+    }
+
+    if (!foundUsername && !foundPassword) {
+        alert("User doesn't exist. Please register first!");
     }
 };
