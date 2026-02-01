@@ -1,0 +1,242 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #1B262C, #0F4C75);
+    font-family: "Inter", Arial, sans-serif;
+    color: #1B262C;
+}
+
+.appContainer {
+    max-width: 760px;
+    margin: 55px auto;
+    background: #BBE1FA;
+    padding: 36px;
+    border-radius: 20px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.25);
+}
+
+.appTitle {
+    text-align: center;
+    font-size: 38px;
+    font-weight: 700;
+    color: #1B262C;
+    margin-bottom: 32px;
+}
+
+.taskInputContainer {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 28px;
+}
+
+#taskInput, 
+#taskDueDate {
+    flex: 1;
+    padding: 15px;
+    border: 2px solid #3282B8;
+    border-radius: 12px;
+    background: #E7F4FF;
+    font-size: 15px;
+    transition: all 0.25s ease;
+    color: #1B262C;
+}
+
+#taskInput:focus, 
+#taskDueDate:focus {
+    border-color: #0F4C75;
+    box-shadow: 0 0 7px rgba(15,76,117,0.4);
+}
+
+#addTaskBtn {
+    padding: 15px 26px;
+    background: #0F4C75;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    transition: 0.25s;
+}
+
+#addTaskBtn:hover {
+    background: #3282B8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(50,130,184,0.4);
+}
+
+.taskActionsContainer {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 26px;
+}
+
+.filterBtn {
+    flex: 1;
+    padding: 11px;
+    border-radius: 12px;
+    border: 2px solid #0F4C75;
+    background: #EAF6FF;
+    font-size: 14px;
+    cursor: pointer;
+    color: #1B262C;
+    transition: 0.25s ease;
+    font-weight: 600;
+}
+
+.filterBtn:hover {
+    background: #BBE1FA;
+}
+
+.activeFilter {
+    background: #0F4C75;
+    color: black;
+    border-color: #3282B8;
+    box-shadow: 0 5px 14px rgba(15,76,117,0.35);
+}
+
+#taskList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.taskItem {
+    padding: 20px;
+    border-radius: 16px;
+    border: 2px solid #3282B8;
+    margin-bottom: 16px;
+    background: #E7F4FF;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    transition: 0.25s ease;
+}
+
+.taskItem:hover {
+    box-shadow: 0 8px 22px rgba(0,0,0,0.15);
+}
+
+.taskName {
+    color: #1B262C;
+    font-size: 18px;
+    font-weight: 700;
+    word-break: break-word;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+
+.expandedText {
+    -webkit-line-clamp: unset;
+    max-height: none;
+}
+
+.showMoreBtn {
+    margin-top: 6px;
+    color: #0F4C75;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-block;
+    transition: 0.2s ease;
+}
+
+.showMoreBtn:hover {
+    color: #3282B8;
+}
+
+.taskDueDateText {
+    margin-top: 6px;
+    color: #1B262C;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.taskActions {
+    margin-top: 16px;
+    display: flex;
+    gap: 12px;
+}
+
+.doneBtn, 
+.deleteBtn {
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.25s ease;
+}
+
+.doneBtn {
+    background: #9687ce;
+    color: white;
+}
+
+.doneBtn:hover {
+    background: #095224;
+    transform: translateY(-2px);
+}
+
+.deleteBtn {
+    background: #cf9b9b;
+    color: white;
+}
+
+.deleteBtn:hover {
+    background: #700b0b;
+    transform: translateY(-2px);
+}
+
+.taskStatsContainer {
+    margin-top: 28px;
+    text-align: center;
+    font-size: 17px;
+    font-weight: 700;
+    color: #1B262C;
+}
+
+@media (max-width: 650px) {
+    .taskInputContainer {
+        flex-direction: column;
+    }
+
+    #addTaskBtn {
+        width: 100%;
+    }
+
+    .taskActions {
+        flex-direction: column;
+    }
+
+    .doneBtn, .deleteBtn {
+        width: 100%;
+    }
+}
+
+.sortBtn {
+    padding: 11px;
+    border-radius: 12px;
+    border: 2px solid #0F4C75;
+    background: #EAF6FF;
+    font-size: 14px;
+    cursor: pointer;
+    color: #1B262C;
+    transition: 0.25s ease;
+    font-weight: 600;
+}
+
+.sortBtn:hover {
+    background: #BBE1FA;
+}
+
+.activeSort {
+    background: #0F4C75;
+    color: white;
+    border-color: #3282B8;
+}
+
+.buttonSpacer {
+    width: 40px;
+}
