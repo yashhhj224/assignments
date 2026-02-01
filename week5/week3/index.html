@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task Manager</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="appContainer">
+    <h1 class="appTitle">Task Manager</h1>
+
+    <div class="taskInputContainer">
+        <input id="taskInput" type="text" placeholder="Enter task description">
+        <input id="taskDueDate" type="date">
+        <button id="addTaskBtn">Add</button>
+    </div>
+
+    <div class="taskActionsContainer">
+        <button class="filterBtn activeFilter" data-filter="all">All</button>
+        <button class="filterBtn" data-filter="pending">Pending</button>
+        <button class="filterBtn" data-filter="completed">Completed</button>
+
+        <div class="buttonSpacer"></div>
+
+        <button class="sortBtn" data-sort="original">Original</button>
+        <button class="sortBtn" data-sort="name">Sort by Name</button>
+        <button class="sortBtn" data-sort="date">Sort by Date</button>
+    </div>
+
+    <ul id="taskList"></ul>
+
+    <div class="taskStatsContainer">
+        <p id="taskStats"></p>
+    </div>
+</div>
+
+<script type="module" src="script.js"></script>
+</body>
+</html>
