@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Gallery</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <div class="topBar">
+        <h1 id="welcomeUser" class="topWelcome"></h1>
+        <button id="quizBtn" class="quizBtn">Quiz</button>
+        <button id="logoutBtn" class="logoutBtn">Logout</button>
+    </div>
+
+    <div class="galleryContainer">
+        <h2 class="welcomeTitle">Employee Directory</h2>
+
+        <div class="employeeCardContainer">
+            <button id="prevEmployee" class="navArrow">&#8592;</button>
+
+            <div class="employeeCard" id="employeeCard">
+                <img id="employeePhoto" class="employeeImage" src="">
+                <h3 id="employeeName"></h3>
+                <p id="employeeDesignation"></p>
+                <button id="viewDetailsBtn" class="detailsBtn">View Details</button>
+            </div>
+
+            <button id="nextEmployee" class="navArrow">&#8594;</button>
+
+            <div class="employeeDetailsPanel hidden" id="employeeDetailsPanel">
+                <h3 id="detailName"></h3>
+                <p id="detailExperience"></p>
+                <p id="detailProject"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/gallery.js"></script>
+
+    <script>
+        const loggedIn = localStorage.getItem("loggedInUser");
+        const stored = JSON.parse(localStorage.getItem("registeredUser"));
+        if (!loggedIn) {
+            alert("Please login first.");
+            window.location.href = "index.html";
+        }
+
+        document.getElementById("welcomeUser").textContent = 
+            "Welcome, " + loggedIn + "!";
+
+        document.getElementById("logoutBtn").onclick = () => {
+            localStorage.removeItem("loggedInUser");
+            window.location.href = "index.html";
+        };
+    </script>
+
+</body>
+</html>

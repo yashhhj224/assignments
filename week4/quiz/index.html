@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Challenge</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <div class="quizContainer">
+
+        <div class="startScreen" id="startScreen">
+            <h1 class="quizTitle">Quiz Challenge</h1>
+
+            <div class="selectGroup">
+                <label>Category</label>
+                <select id="categorySelect" class="selectInput">
+                    <option value="general">General Knowledge</option>
+                    <option value="tech">Technology</option>
+                    <option value="science">Science</option>
+                </select>
+
+                <label>Difficulty</label>
+                <select id="difficultySelect" class="selectInput">
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
+
+            <button id="startBtn" class="primaryBtn">Start Quiz</button>
+            <button id="viewLeaderboardBtn" class="secondaryBtn">View Leaderboard</button>
+
+            <button onclick="window.location.href='../week2/welcome.html'" class="secondaryBtn" style="margin-top: 20px;">
+                Back to Dashboard
+            </button>
+        </div>
+
+
+        <div class="quizScreen" id="quizScreen">
+            <div class="quizHeader">
+                <div id="timerBox" class="timerBox">10</div>
+                <div id="progressText" class="progressText"></div>
+            </div>
+
+            <h2 id="questionText" class="questionText"></h2>
+            <div id="optionsContainer" class="optionsContainer"></div>
+
+            <button id="nextBtn" class="primaryBtn">Next</button>
+        </div>
+
+
+        <div class="resultScreen" id="resultScreen">
+            <h2>Your Score</h2>
+            <p id="scoreText"></p>
+
+            <button id="saveScoreBtn" class="primaryBtn">Save Score</button>
+            <button id="resultViewLeaderboardBtn" class="secondaryBtn">View Leaderboard</button>
+            <button id="restartBtn" class="secondaryBtn" style="display:none;">Restart</button>
+
+            <button onclick="window.location.href='../week2/welcome.html'" class="secondaryBtn">
+                Back to Dashboard
+            </button>
+        </div>
+
+
+        <div class="leaderboardScreen" id="leaderboardScreen">
+            <h2>Leaderboard</h2>
+            <ul id="leaderboardList" class="leaderboardList"></ul>
+
+            <button id="backToStartBtn" class="secondaryBtn">Back</button>
+        </div>
+
+    </div>
+
+    <script type="module" src="dist/questions.js"></script>
+    <script type="module" src="dist/leaderboard.js"></script>
+    <script type="module" src="dist/types.js"></script>
+    <script type="module" src="dist/quiz.js"></script>
+
+</body>
+</html>
