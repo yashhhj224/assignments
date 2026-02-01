@@ -1,0 +1,162 @@
+[
+  { 
+    "id": 1, 
+    "title": "Inception", 
+    "genre": "Sci-Fi", 
+    "rating": 8.8, 
+    "year": 2010,
+    "image": "/images/inception.jpg"
+  },
+  { 
+    "id": 2, 
+    "title": "Interstellar", 
+    "genre": "Sci-Fi", 
+    "rating": 8.6, 
+    "year": 2014,
+    "image": "/images/interstellar.jpg"
+  },
+  { 
+    "id": 3, 
+    "title": "The Dark Knight", 
+    "genre": "Action", 
+    "rating": 9.0, 
+    "year": 2008,
+    "image": "/images/darkKnight.jpg"
+  },
+  { 
+    "id": 4, 
+    "title": "Parasite", 
+    "genre": "Thriller", 
+    "rating": 8.5, 
+    "year": 2019,
+    "image": "/images/parasite.jpg"
+  },
+  { 
+    "id": 5, 
+    "title": "Avengers Endgame", 
+    "genre": "Action", 
+    "rating": 8.4, 
+    "year": 2019,
+    "image": "/images/avengers.jpg" 
+  },
+  { 
+    "id": 6, 
+    "title": "Forrest Gump", 
+    "genre": "Drama", 
+    "rating": 8.8, 
+    "year": 1994,
+    "image": "/images/forrestGump.jpg"
+  },
+  { 
+    "id": 7, 
+    "title": "Joker", 
+    "genre": "Drama", 
+    "rating": 8.4, 
+    "year": 2019,
+    "image": "/images/joker.jpg"
+  },
+  { 
+    "id": 8, 
+    "title": "Gladiator", 
+    "genre": "Action", 
+    "rating": 8.5, 
+    "year": 2000,
+    "image": "/images/gladiator.jpg" 
+  },
+  { 
+    "id": 9, 
+    "title": "Titanic", 
+    "genre": "Romance", 
+    "rating": 7.9, 
+    "year": 1997,
+    "image": "/images/titanic.jpg"
+  },
+  { 
+    "id": 10, 
+    "title": "The Matrix", 
+    "genre": "Sci-Fi", 
+    "rating": 8.7, 
+    "year": 1999,
+    "image": "/images/theMatrix.jpg"
+  },
+  { 
+    "id": 11, 
+    "title": "Whiplash", 
+    "genre": "Drama", 
+    "rating": 8.5, 
+    "year": 2014,
+    "image": "/images/whiplash.jpg"
+  },
+  { 
+    "id": 12, 
+    "title": "The Prestige", 
+    "genre": "Drama", 
+    "rating": 8.5, 
+    "year": 2006,
+    "image": "/images/prestige.jpg" 
+  },
+  { 
+    "id": 13, 
+    "title": "Dune", 
+    "genre": "Sci-Fi", 
+    "rating": 8.1, 
+    "year": 2021,
+    "image": "/images/dune.jpg"
+  },
+  { 
+    "id": 14, 
+    "title": "Shutter Island", 
+    "genre": "Thriller", 
+    "rating": 8.2, 
+    "year": 2010,
+    "image": "/images/shutterIsland.jpg"
+  },
+  { 
+    "id": 15, 
+    "title": "Fight Club", 
+    "genre": "Drama", 
+    "rating": 8.8, 
+    "year": 1999,
+    "image": "/images/fightClub.jpg"
+  },
+  { 
+    "id": 16, 
+    "title": "The Godfather", 
+    "genre": "Crime", 
+    "rating": 9.2, 
+    "year": 1972,
+    "image": "/images/godfather.jpg"
+  },
+  { 
+    "id": 17, 
+    "title": "John Wick", 
+    "genre": "Action", 
+    "rating": 7.4, 
+    "year": 2014,
+    "image": "/images/johnWick.jpg" 
+  },
+  { 
+    "id": 18, 
+    "title": "Oppenheimer", 
+    "genre": "Drama", 
+    "rating": 8.6, 
+    "year": 2023,
+    "image": "/images/oppenheimer.jpg" 
+  },
+  { 
+    "id": 19, 
+    "title": "Avatar", 
+    "genre": "Fantasy", 
+    "rating": 7.8, 
+    "year": 2009,
+    "image": "/images/avatar.jpg"
+  },
+  { 
+    "id": 20, 
+    "title": "The Shawshank Redemption", 
+    "genre": "Drama", 
+    "rating": 9.3, 
+    "year": 1994,
+    "image": "/images/shawshankRedemption.jpg"
+  }
+]
