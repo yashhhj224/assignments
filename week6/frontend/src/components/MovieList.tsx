@@ -68,7 +68,7 @@ function MovieList() {
           value={sortOrder}
           onChange={e => setSortOrder(e.target.value)}
         >
-          <option value="none">No Sort</option>
+          <option value="none">Default</option>
           <option value="rating">Sort by Rating</option>
           <option value="year">Sort by Year</option>
         </select>
