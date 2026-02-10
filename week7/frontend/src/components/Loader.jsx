@@ -1,7 +1,5 @@
+import "../styles/components.css";
+
 export default function Loader() {
-  return (
-    <div style={{ textAlign: "center", padding: "20px", fontWeight: "600" }}>
-      Loading...
-    </div>
-  );
+  return <div className="loader-box">Loading...</div>;
 }

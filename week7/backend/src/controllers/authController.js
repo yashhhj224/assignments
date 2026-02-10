@@ -10,6 +10,24 @@ const registerUser = async (req, res, next) => {
       return res.status(400).json({ message: "All fields are required." });
     }
 
+    if (!fullName || !emailAddress || !password) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+
+    const allowedDomain = "gmail.com";
+
+    const emailDomain = emailAddress.split("@")[1];
+
+    if (!emailDomain) {
+      return res.status(400).json({ message: "Invalid email format." });
+    }
+
+    if (emailDomain.toLowerCase() !== allowedDomain) {
+      return res
+        .status(400)
+        .json({ message: `Only ${allowedDomain} emails are allowed.` });
+    }
+
     const existingUser = await User.findOne({ emailAddress });
 
     if (existingUser) {
@@ -50,13 +68,17 @@ const loginUser = async (req, res, next) => {
     const user = await User.findOne({ emailAddress });
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials." });
+      return res
+        .status(404)
+        .json({ message: "User not registered. Please sign up first." });
     }
 
     const isPasswordCorrect = await bcrypt.compare(password, user.hashedPassword);
 
     if (!isPasswordCorrect) {
-      return res.status(401).json({ message: "Invalid credentials." });
+      return res
+        .status(401)
+        .json({ message: "Incorrect password. Please try again." });
     }
 
     return res.status(200).json({

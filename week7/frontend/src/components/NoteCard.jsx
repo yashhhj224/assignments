@@ -1,42 +1,41 @@
-export default function NoteCard({ note, onEditClick, onDeleteClick }) {
-  return (
-    <div
-      style={{
-        backgroundColor: "#ffffff",
-        padding: "15px",
-        borderRadius: "10px",
-        boxShadow: "0px 2px 8px rgba(0,0,0,0.1)",
-        marginBottom: "15px"
-      }}
-    >
-      <h3 style={{ marginBottom: "5px", color: "#222" }}>{note.title}</h3>
-      <p style={{ marginBottom: "10px", color: "#555" }}>{note.content}</p>
+import { useState } from "react";
+import "../styles/notes.css";
 
-      <div style={{ display: "flex", gap: "10px" }}>
-        <button
-          onClick={() => onEditClick(note)}
-          style={{
-            padding: "8px 12px",
-            border: "none",
-            borderRadius: "6px",
-            backgroundColor: "#2563eb",
-            color: "white",
-            cursor: "pointer"
-          }}
-        >
+export default function NoteCard({ note, onEditClick, onDeleteClick }) {
+  const [showFull, setShowFull] = useState(false);
+
+  const limitText = (text, limit) => {
+    if (text.length <= limit) return text;
+    return text.substring(0, limit) + "...";
+  };
+
+  const isLongTitle = note.title.length > 40;
+  const isLongContent = note.content.length > 120;
+
+  return (
+    <div className="note-card">
+      <h3 className="note-title">
+        {showFull ? note.title : limitText(note.title, 40)}
+      </h3>
+
+      <p className={`note-content ${showFull ? "expanded" : ""}`}>
+        {showFull ? note.content : limitText(note.content, 120)}
+      </p>
+
+      {(isLongTitle || isLongContent) && (
+        <button className="show-btn" onClick={() => setShowFull(!showFull)}>
+          {showFull ? "Show Less" : "Show More"}
+        </button>
+      )}
+
+      <div className="note-actions">
+        <button className="note-btn edit" onClick={() => onEditClick(note)}>
           Edit
         </button>
 
         <button
+          className="note-btn delete"
           onClick={() => onDeleteClick(note._id)}
-          style={{
-            padding: "8px 12px",
-            border: "none",
-            borderRadius: "6px",
-            backgroundColor: "#dc2626",
-            color: "white",
-            cursor: "pointer"
-          }}
         >
           Delete
         </button>

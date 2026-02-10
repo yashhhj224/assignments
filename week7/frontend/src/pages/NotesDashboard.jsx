@@ -6,6 +6,7 @@ import Loader from "../components/Loader";
 import ErrorMessage from "../components/ErrorMessage";
 import { clearAuthData, getLoggedInUser } from "../utils/authHelper";
 import { useNavigate } from "react-router-dom";
+import "../styles/notes.css";
 
 export default function NotesDashboard() {
   const [notes, setNotes] = useState([]);
@@ -76,27 +77,15 @@ export default function NotesDashboard() {
   };
 
   return (
-    <div style={{ maxWidth: "700px", margin: "40px auto" }}>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
+    <div className="dashboard-container">
+      <div className="dashboard-header">
         <h1>Notes Dashboard</h1>
-        <button
-          onClick={handleLogout}
-          style={{
-            padding: "10px 14px",
-            border: "none",
-            borderRadius: "6px",
-            backgroundColor: "#dc2626",
-            color: "white",
-            cursor: "pointer"
-          }}
-        >
+        <button className="logout-btn" onClick={handleLogout}>
           Logout
         </button>
       </div>
 
-      <p style={{ marginTop: "5px", marginBottom: "20px", color: "#444" }}>
-        Welcome, {loggedInUser?.fullName}
-      </p>
+      <p className="welcome-text">Welcome, {loggedInUser?.fullName}</p>
 
       <ErrorMessage message={errorMessage} />
 
@@ -109,16 +98,20 @@ export default function NotesDashboard() {
       {isLoading ? (
         <Loader />
       ) : notes.length === 0 ? (
-        <p style={{ textAlign: "center" }}>No notes found.</p>
+        <p style={{ textAlign: "center", fontWeight: "700" }}>No notes found.</p>
       ) : (
-        notes.map((note) => (
-          <NoteCard
-            key={note._id}
-            note={note}
-            onEditClick={handleEditClick}
-            onDeleteClick={handleDeleteClick}
-          />
-        ))
+        <div className="notes-grid">
+          {
+            notes.map((note) => (
+              <NoteCard
+                key={note._id}
+                note={note}
+                onEditClick={handleEditClick}
+                onDeleteClick={handleDeleteClick}
+              />
+            ))
+          }
+        </div>
       )}
     </div>
   );

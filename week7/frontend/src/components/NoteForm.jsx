@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "../styles/notes.css";
 
 export default function NoteForm({ onSubmit, selectedNote, onCancel }) {
   const [title, setTitle] = useState("");
@@ -22,77 +23,31 @@ export default function NoteForm({ onSubmit, selectedNote, onCancel }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{
-        backgroundColor: "#f9fafb",
-        padding: "15px",
-        borderRadius: "10px",
-        marginBottom: "20px"
-      }}
-    >
-      <h2 style={{ marginBottom: "10px" }}>
-        {selectedNote ? "Update Note" : "Create Note"}
-      </h2>
+    <form className="note-form" onSubmit={handleSubmit}>
+      <h2>{selectedNote ? "Update Note" : "Create Note"}</h2>
 
       <input
         type="text"
-        placeholder="Enter note title"
+        placeholder="Enter note title (e.g. Shopping List)"
         value={title}
         onChange={(event) => setTitle(event.target.value)}
         required
-        style={{
-          width: "100%",
-          padding: "10px",
-          marginBottom: "10px",
-          borderRadius: "6px",
-          border: "1px solid #ccc"
-        }}
       />
 
       <textarea
-        placeholder="Enter note content"
+        placeholder="Write your note here... (e.g. Buy milk, eggs, bread)"
         value={content}
         onChange={(event) => setContent(event.target.value)}
         required
-        style={{
-          width: "100%",
-          padding: "10px",
-          marginBottom: "10px",
-          borderRadius: "6px",
-          border: "1px solid #ccc",
-          minHeight: "90px"
-        }}
       />
 
-      <div style={{ display: "flex", gap: "10px" }}>
-        <button
-          type="submit"
-          style={{
-            padding: "10px 14px",
-            border: "none",
-            borderRadius: "6px",
-            backgroundColor: "#16a34a",
-            color: "white",
-            cursor: "pointer"
-          }}
-        >
+      <div className="form-actions">
+        <button type="submit" className="form-btn save">
           {selectedNote ? "Update" : "Create"}
         </button>
 
         {selectedNote && (
-          <button
-            type="button"
-            onClick={onCancel}
-            style={{
-              padding: "10px 14px",
-              border: "none",
-              borderRadius: "6px",
-              backgroundColor: "#6b7280",
-              color: "white",
-              cursor: "pointer"
-            }}
-          >
+          <button type="button" className="form-btn cancel" onClick={onCancel}>
             Cancel
           </button>
         )}

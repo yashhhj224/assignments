@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { registerUser } from "../api/apiClient";
-import { saveAuthData } from "../utils/authHelper";
 import { useNavigate, Link } from "react-router-dom";
 import ErrorMessage from "../components/ErrorMessage";
+import "../styles/auth.css";
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
@@ -12,89 +12,71 @@ export default function RegisterPage() {
 
   const navigate = useNavigate();
 
+  const allowedDomain = "gmail.com";
+
   const handleRegister = async (event) => {
     event.preventDefault();
     setErrorMessage("");
 
+    const domain = emailAddress.split("@")[1];
+
+    if (!domain) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    if (domain.toLowerCase() !== allowedDomain) {
+      setErrorMessage(`Only ${allowedDomain} emails are allowed.`);
+      return;
+    }
+
     try {
-      const response = await registerUser({ fullName, emailAddress, password });
-      saveAuthData(response.token, response.user);
-      navigate("/dashboard");
+      await registerUser({ fullName, emailAddress, password });
+
+      alert("Registration successful! Please login now.");
+      navigate("/");
     } catch (error) {
       setErrorMessage(error.message);
     }
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "50px auto" }}>
-      <h1 style={{ textAlign: "center", marginBottom: "20px" }}>Register</h1>
+    <div className="auth-container">
+      <h1 className="auth-title">Register</h1>
 
       <ErrorMessage message={errorMessage} />
 
-      <form onSubmit={handleRegister}>
+      <form className="auth-form" onSubmit={handleRegister}>
         <input
           type="text"
-          placeholder="Full Name"
+          placeholder="Enter your full name (e.g. Yash Joshi)"
           value={fullName}
           onChange={(event) => setFullName(event.target.value)}
           required
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginBottom: "10px",
-            borderRadius: "6px",
-            border: "1px solid #ccc"
-          }}
         />
 
         <input
           type="email"
-          placeholder="Email Address"
+          placeholder={`Enter your email (only @${allowedDomain})`}
           value={emailAddress}
           onChange={(event) => setEmailAddress(event.target.value)}
           required
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginBottom: "10px",
-            borderRadius: "6px",
-            border: "1px solid #ccc"
-          }}
         />
 
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Create password (min 6 characters)"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           required
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginBottom: "10px",
-            borderRadius: "6px",
-            border: "1px solid #ccc"
-          }}
         />
 
-        <button
-          type="submit"
-          style={{
-            width: "100%",
-            padding: "10px",
-            border: "none",
-            borderRadius: "6px",
-            backgroundColor: "#2563eb",
-            color: "white",
-            cursor: "pointer",
-            fontWeight: "600"
-          }}
-        >
+        <button type="submit" className="auth-btn register">
           Register
         </button>
       </form>
 
-      <p style={{ marginTop: "15px", textAlign: "center" }}>
+      <p className="auth-footer">
         Already have an account? <Link to="/">Login</Link>
       </p>
     </div>

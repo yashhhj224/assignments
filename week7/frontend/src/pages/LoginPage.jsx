@@ -3,6 +3,7 @@ import { loginUser } from "../api/apiClient";
 import { saveAuthData } from "../utils/authHelper";
 import { useNavigate, Link } from "react-router-dom";
 import ErrorMessage from "../components/ErrorMessage";
+import "../styles/auth.css";
 
 export default function LoginPage() {
   const [emailAddress, setEmailAddress] = useState("");
@@ -25,60 +26,34 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "50px auto" }}>
-      <h1 style={{ textAlign: "center", marginBottom: "20px" }}>Login</h1>
+    <div className="auth-container">
+      <h1 className="auth-title">Login</h1>
 
       <ErrorMessage message={errorMessage} />
 
-      <form onSubmit={handleLogin}>
+      <form className="auth-form" onSubmit={handleLogin}>
         <input
           type="email"
-          placeholder="Email Address"
+          placeholder="Enter your email (example@gmail.com)"
           value={emailAddress}
           onChange={(event) => setEmailAddress(event.target.value)}
           required
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginBottom: "10px",
-            borderRadius: "6px",
-            border: "1px solid #ccc"
-          }}
         />
 
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Enter your password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           required
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginBottom: "10px",
-            borderRadius: "6px",
-            border: "1px solid #ccc"
-          }}
         />
 
-        <button
-          type="submit"
-          style={{
-            width: "100%",
-            padding: "10px",
-            border: "none",
-            borderRadius: "6px",
-            backgroundColor: "#16a34a",
-            color: "white",
-            cursor: "pointer",
-            fontWeight: "600"
-          }}
-        >
+        <button type="submit" className="auth-btn login">
           Login
         </button>
       </form>
 
-      <p style={{ marginTop: "15px", textAlign: "center" }}>
+      <p className="auth-footer">
         New user? <Link to="/register">Register</Link>
       </p>
     </div>
