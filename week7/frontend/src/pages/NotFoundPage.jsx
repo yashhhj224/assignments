@@ -1,14 +1,15 @@
 import { Link } from "react-router-dom";
+import { NotFoundContainer, NotFoundTitle, NotFoundText, NotFoundLink } from "../styles/NotFoundStyles";
 
 export default function NotFoundPage() {
   return (
-    <div style={{ textAlign: "center", marginTop: "100px" }}>
-      <h1 style={{ fontSize: "60px", marginBottom: "10px" }}>404</h1>
-      <p style={{ fontSize: "18px", fontWeight: "800" }}>Page not found</p>
+    <NotFoundContainer>
+      <NotFoundTitle>404</NotFoundTitle>
+      <NotFoundText>Page not found</NotFoundText>
 
-      <Link to="/" style={{ color: "#2563eb", fontWeight: "800" }}>
-        Go to Login
-      </Link>
-    </div>
+      <NotFoundLink>
+        <Link to="/">Go to Login</Link>
+      </NotFoundLink>
+    </NotFoundContainer>
   );
 }

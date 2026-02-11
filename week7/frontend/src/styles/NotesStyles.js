@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 export const DashboardContainer = styled.div`
   max-width: 900px;
-  margin: 50px auto;
+  margin: 20px auto;
   padding: 20px;
 `;
 
@@ -186,4 +186,11 @@ export const CharCounter = styled.p`
   font-size: 13px;
   font-weight: 700;
   color: ${(props) => (props.$danger ? "#dc2626" : "#6b7280")};
+`;
+
+export const NoNotesText = styled.p`
+  text-align: center;
+  font-weight: 700;
+  margin-top: 20px;
+  color: #374151;
 `;

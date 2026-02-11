@@ -23,7 +23,9 @@ export default function LoginPage() {
     event.preventDefault();
     setErrorMessage("");
 
-    if (!validateEmail(emailAddress)) {
+    const trimmedEmail = emailAddress.trim();
+
+    if (!validateEmail(trimmedEmail)) {
       setErrorMessage("Please enter a valid email address.");
       return;
     }
@@ -36,7 +38,7 @@ export default function LoginPage() {
     }
 
     try {
-      const response = await loginUser({ emailAddress, password });
+      const response = await loginUser({ emailAddress: trimmedEmail, password });
       saveAuthData(response.token, response.user);
 
       navigate("/dashboard", { replace: true });

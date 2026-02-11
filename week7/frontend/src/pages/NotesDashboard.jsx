@@ -4,9 +4,9 @@ import NoteCard from "../components/NoteCard";
 import NoteForm from "../components/NoteForm";
 import Loader from "../components/Loader";
 import ErrorMessage from "../components/ErrorMessage";
-import { clearAuthData, getLoggedInUser, isUserLoggedIn } from "../utils/authHelper";
+import { clearAuthData, getLoggedInUser } from "../utils/authHelper";
 import { useNavigate } from "react-router-dom";
-import { DashboardContainer, DashboardHeader, WelcomeText, LogoutButton, NotesGrid } from "../styles/NotesStyles";
+import { DashboardContainer, DashboardHeader, WelcomeText, LogoutButton, NotesGrid, NoNotesText } from "../styles/NotesStyles";
 
 export default function NotesDashboard() {
   const [notes, setNotes] = useState([]);
@@ -92,7 +92,7 @@ export default function NotesDashboard() {
         <LogoutButton type="button" onClick={handleLogout}>
           Logout
         </LogoutButton>
-    </DashboardHeader>
+      </DashboardHeader>
 
       <WelcomeText>Welcome, {loggedInUser?.fullName}</WelcomeText>
 
@@ -107,9 +107,7 @@ export default function NotesDashboard() {
       {isLoading ? (
         <Loader />
       ) : notes.length === 0 ? (
-        <p style={{ textAlign: "center", fontWeight: "700" }}>
-          No notes found.
-        </p>
+        <NoNotesText>No notes found.</NoNotesText>
       ) : (
         <NotesGrid>
           {notes.map((note) => (

@@ -5,7 +5,10 @@ const { validateEmail, validatePassword } = require("../utils/validators");
 
 const registerUser = async (req, res, next) => {
   try {
-    const { fullName, emailAddress, password } = req.body;
+    let { fullName, emailAddress, password } = req.body;
+
+    emailAddress = emailAddress.trim().toLowerCase();
+    fullName = fullName.trim();
 
     if (!fullName || !emailAddress || !password) {
       return res.status(400).json({ message: "All fields are required." });
@@ -22,7 +25,7 @@ const registerUser = async (req, res, next) => {
       });
     }
 
-    const existingUser = await User.findOne({ emailAddress: emailAddress.toLowerCase() });
+    const existingUser = await User.findOne({ emailAddress });
 
     if (existingUser) {
       return res.status(400).json({ message: "User already exists." });
@@ -33,7 +36,7 @@ const registerUser = async (req, res, next) => {
 
     const createdUser = await User.create({
       fullName,
-      emailAddress: emailAddress.toLowerCase(),
+      emailAddress,
       hashedPassword
     });
 
@@ -53,7 +56,9 @@ const registerUser = async (req, res, next) => {
 
 const loginUser = async (req, res, next) => {
   try {
-    const { emailAddress, password } = req.body;
+    let { emailAddress, password } = req.body;
+
+    emailAddress = emailAddress.trim().toLowerCase();
 
     if (!emailAddress || !password) {
       return res.status(400).json({ message: "All fields are required." });
@@ -63,7 +68,7 @@ const loginUser = async (req, res, next) => {
       return res.status(400).json({ message: "Invalid email format." });
     }
 
-    const user = await User.findOne({ emailAddress: emailAddress.toLowerCase() });
+    const user = await User.findOne({ emailAddress });
 
     if (!user) {
       return res

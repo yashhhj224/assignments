@@ -9,8 +9,8 @@ export default function NoteCard({ note, onEditClick, onDeleteClick }) {
     return text.substring(0, limit) + "...";
   };
 
-  const isLongTitle = note.title.length > 40;
-  const isLongContent = note.content.length > 120;
+  const isLongTitle = note.title.length > 120;
+  const isLongContent = note.content.length > 300;
 
   return (
     <NoteCardBox>

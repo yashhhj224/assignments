@@ -1,11 +1,6 @@
 const express = require("express");
 const authenticateUser = require("../middlewares/authMiddleware");
-const {
-  getNotes,
-  createNote,
-  updateNote,
-  deleteNote
-} = require("../controllers/notesController");
+const { getNotes, createNote, updateNote, deleteNote } = require("../controllers/notesController");
 
 const router = express.Router();
 
