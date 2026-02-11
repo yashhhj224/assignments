@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/userModel");
 const generateToken = require("../utils/generateToken");
+const { validateEmail, validatePassword } = require("../utils/validators");
 
 const registerUser = async (req, res, next) => {
   try {
@@ -10,25 +11,18 @@ const registerUser = async (req, res, next) => {
       return res.status(400).json({ message: "All fields are required." });
     }
 
-    if (!fullName || !emailAddress || !password) {
-      return res.status(400).json({ message: "All fields are required." });
-    }
-
-    const allowedDomain = "gmail.com";
-
-    const emailDomain = emailAddress.split("@")[1];
-
-    if (!emailDomain) {
+    if (!validateEmail(emailAddress)) {
       return res.status(400).json({ message: "Invalid email format." });
     }
 
-    if (emailDomain.toLowerCase() !== allowedDomain) {
-      return res
-        .status(400)
-        .json({ message: `Only ${allowedDomain} emails are allowed.` });
+    if (!validatePassword(password)) {
+      return res.status(400).json({
+        message:
+          "Password must be at least 6 characters and include uppercase, lowercase and number."
+      });
     }
 
-    const existingUser = await User.findOne({ emailAddress });
+    const existingUser = await User.findOne({ emailAddress: emailAddress.toLowerCase() });
 
     if (existingUser) {
       return res.status(400).json({ message: "User already exists." });
@@ -39,7 +33,7 @@ const registerUser = async (req, res, next) => {
 
     const createdUser = await User.create({
       fullName,
-      emailAddress,
+      emailAddress: emailAddress.toLowerCase(),
       hashedPassword
     });
 
@@ -65,7 +59,11 @@ const loginUser = async (req, res, next) => {
       return res.status(400).json({ message: "All fields are required." });
     }
 
-    const user = await User.findOne({ emailAddress });
+    if (!validateEmail(emailAddress)) {
+      return res.status(400).json({ message: "Invalid email format." });
+    }
+
+    const user = await User.findOne({ emailAddress: emailAddress.toLowerCase() });
 
     if (!user) {
       return res

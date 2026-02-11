@@ -4,9 +4,9 @@ import NoteCard from "../components/NoteCard";
 import NoteForm from "../components/NoteForm";
 import Loader from "../components/Loader";
 import ErrorMessage from "../components/ErrorMessage";
-import { clearAuthData, getLoggedInUser } from "../utils/authHelper";
+import { clearAuthData, getLoggedInUser, isUserLoggedIn } from "../utils/authHelper";
 import { useNavigate } from "react-router-dom";
-import "../styles/notes.css";
+import { DashboardContainer, DashboardHeader, WelcomeText, LogoutButton, NotesGrid } from "../styles/NotesStyles";
 
 export default function NotesDashboard() {
   const [notes, setNotes] = useState([]);
@@ -26,6 +26,15 @@ export default function NotesDashboard() {
       setNotes(notesData);
     } catch (error) {
       setErrorMessage(error.message);
+
+      if (
+        error.message.toLowerCase().includes("invalid token") ||
+        error.message.toLowerCase().includes("access denied") ||
+        error.message.toLowerCase().includes("token missing")
+      ) {
+        clearAuthData();
+        navigate("/", { replace: true });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -73,19 +82,19 @@ export default function NotesDashboard() {
 
   const handleLogout = () => {
     clearAuthData();
-    navigate("/");
+    navigate("/", { replace: true });
   };
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
+    <DashboardContainer>
+      <DashboardHeader>
         <h1>Notes Dashboard</h1>
-        <button className="logout-btn" onClick={handleLogout}>
+        <LogoutButton type="button" onClick={handleLogout}>
           Logout
-        </button>
-      </div>
+        </LogoutButton>
+    </DashboardHeader>
 
-      <p className="welcome-text">Welcome, {loggedInUser?.fullName}</p>
+      <WelcomeText>Welcome, {loggedInUser?.fullName}</WelcomeText>
 
       <ErrorMessage message={errorMessage} />
 
@@ -98,21 +107,21 @@ export default function NotesDashboard() {
       {isLoading ? (
         <Loader />
       ) : notes.length === 0 ? (
-        <p style={{ textAlign: "center", fontWeight: "700" }}>No notes found.</p>
+        <p style={{ textAlign: "center", fontWeight: "700" }}>
+          No notes found.
+        </p>
       ) : (
-        <div className="notes-grid">
-          {
-            notes.map((note) => (
-              <NoteCard
-                key={note._id}
-                note={note}
-                onEditClick={handleEditClick}
-                onDeleteClick={handleDeleteClick}
-              />
-            ))
-          }
-        </div>
+        <NotesGrid>
+          {notes.map((note) => (
+            <NoteCard
+              key={note._id}
+              note={note}
+              onEditClick={handleEditClick}
+              onDeleteClick={handleDeleteClick}
+            />
+          ))}
+        </NotesGrid>
       )}
-    </div>
+    </DashboardContainer>
   );
 }

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { loginUser } from "../api/apiClient";
-import { saveAuthData } from "../utils/authHelper";
+import { saveAuthData, isUserLoggedIn } from "../utils/authHelper";
 import { useNavigate, Link } from "react-router-dom";
 import ErrorMessage from "../components/ErrorMessage";
-import "../styles/auth.css";
+import { validateEmail, validatePassword } from "../utils/validators";
+import { AuthContainer, AuthTitle, AuthForm, AuthButton, AuthFooter } from "../styles/AuthStyles";
 
 export default function LoginPage() {
   const [emailAddress, setEmailAddress] = useState("");
@@ -12,26 +13,45 @@ export default function LoginPage() {
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (isUserLoggedIn()) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
+
   const handleLogin = async (event) => {
     event.preventDefault();
     setErrorMessage("");
 
+    if (!validateEmail(emailAddress)) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setErrorMessage(
+        "Password must be at least 6 characters and include uppercase, lowercase and number."
+      );
+      return;
+    }
+
     try {
       const response = await loginUser({ emailAddress, password });
       saveAuthData(response.token, response.user);
-      navigate("/dashboard");
+
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       setErrorMessage(error.message);
     }
   };
 
   return (
-    <div className="auth-container">
-      <h1 className="auth-title">Login</h1>
+    <AuthContainer>
+      <AuthTitle>Login</AuthTitle>
 
       <ErrorMessage message={errorMessage} />
 
-      <form className="auth-form" onSubmit={handleLogin}>
+      <AuthForm onSubmit={handleLogin}>
         <input
           type="email"
           placeholder="Enter your email (example@gmail.com)"
@@ -48,14 +68,14 @@ export default function LoginPage() {
           required
         />
 
-        <button type="submit" className="auth-btn login">
+        <AuthButton type="submit" $variant="login">
           Login
-        </button>
-      </form>
+        </AuthButton>
+      </AuthForm>
 
-      <p className="auth-footer">
+      <AuthFooter>
         New user? <Link to="/register">Register</Link>
-      </p>
-    </div>
+      </AuthFooter>
+    </AuthContainer>
   );
 }

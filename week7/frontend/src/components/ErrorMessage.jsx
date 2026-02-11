@@ -1,7 +1,6 @@
-import "../styles/components.css";
+import { ErrorBox } from "../styles/CommonStyles";
 
 export default function ErrorMessage({ message }) {
   if (!message) return null;
-
-  return <div className="error-box">{message}</div>;
+  return <ErrorBox>{message}</ErrorBox>;
 }

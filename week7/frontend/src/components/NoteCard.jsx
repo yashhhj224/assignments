@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "../styles/notes.css";
+import { NoteCardBox, NoteTitle, NoteContent, NoteActions, NoteButton, ShowButton } from "../styles/NotesStyles";
 
 export default function NoteCard({ note, onEditClick, onDeleteClick }) {
   const [showFull, setShowFull] = useState(false);
@@ -13,33 +13,28 @@ export default function NoteCard({ note, onEditClick, onDeleteClick }) {
   const isLongContent = note.content.length > 120;
 
   return (
-    <div className="note-card">
-      <h3 className="note-title">
-        {showFull ? note.title : limitText(note.title, 40)}
-      </h3>
+    <NoteCardBox>
+      <NoteTitle>{showFull ? note.title : limitText(note.title, 40)}</NoteTitle>
 
-      <p className={`note-content ${showFull ? "expanded" : ""}`}>
+      <NoteContent>
         {showFull ? note.content : limitText(note.content, 120)}
-      </p>
+      </NoteContent>
 
       {(isLongTitle || isLongContent) && (
-        <button className="show-btn" onClick={() => setShowFull(!showFull)}>
+        <ShowButton onClick={() => setShowFull(!showFull)}>
           {showFull ? "Show Less" : "Show More"}
-        </button>
+        </ShowButton>
       )}
 
-      <div className="note-actions">
-        <button className="note-btn edit" onClick={() => onEditClick(note)}>
+      <NoteActions>
+        <NoteButton $variant="edit" onClick={() => onEditClick(note)}>
           Edit
-        </button>
+        </NoteButton>
 
-        <button
-          className="note-btn delete"
-          onClick={() => onDeleteClick(note._id)}
-        >
+        <NoteButton $variant="delete" onClick={() => onDeleteClick(note._id)}>
           Delete
-        </button>
-      </div>
-    </div>
+        </NoteButton>
+      </NoteActions>
+    </NoteCardBox>
   );
 }

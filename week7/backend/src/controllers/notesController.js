@@ -17,6 +17,10 @@ const createNote = async (req, res, next) => {
       return res.status(400).json({ message: "Title and content are required." });
     }
 
+    if (title.length > 120) {
+      return res.status(400).json({ message: "Title cannot exceed 120 characters." });
+    }
+
     const newNote = await Note.create({
       userId: req.user._id,
       title,
@@ -32,6 +36,11 @@ const createNote = async (req, res, next) => {
 const updateNote = async (req, res, next) => {
   try {
     const { title, content } = req.body;
+
+    if (title && title.length > 120) {
+      return res.status(400).json({ message: "Title cannot exceed 120 characters." });
+    }
+
     const noteId = req.params.id;
 
     const note = await Note.findOne({ _id: noteId, userId: req.user._id });

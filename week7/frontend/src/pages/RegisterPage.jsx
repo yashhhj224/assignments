@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { registerUser } from "../api/apiClient";
 import { useNavigate, Link } from "react-router-dom";
 import ErrorMessage from "../components/ErrorMessage";
-import "../styles/auth.css";
+import { validateEmail, validatePassword, validateFullName } from "../utils/validators";
+import { isUserLoggedIn } from "../utils/authHelper";
+import { AuthContainer, AuthTitle, AuthForm, AuthButton, AuthFooter } from "../styles/AuthStyles";
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
@@ -12,21 +14,30 @@ export default function RegisterPage() {
 
   const navigate = useNavigate();
 
-  const allowedDomain = "gmail.com";
+  useEffect(() => {
+    if (isUserLoggedIn()) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
 
   const handleRegister = async (event) => {
     event.preventDefault();
     setErrorMessage("");
 
-    const domain = emailAddress.split("@")[1];
+    if (!validateFullName(fullName)) {
+      setErrorMessage("Full name must be at least 3 characters.");
+      return;
+    }
 
-    if (!domain) {
+    if (!validateEmail(emailAddress)) {
       setErrorMessage("Please enter a valid email address.");
       return;
     }
 
-    if (domain.toLowerCase() !== allowedDomain) {
-      setErrorMessage(`Only ${allowedDomain} emails are allowed.`);
+    if (!validatePassword(password)) {
+      setErrorMessage(
+        "Password must be at least 6 characters and include uppercase, lowercase and number."
+      );
       return;
     }
 
@@ -34,19 +45,20 @@ export default function RegisterPage() {
       await registerUser({ fullName, emailAddress, password });
 
       alert("Registration successful! Please login now.");
-      navigate("/");
+
+      navigate("/", { replace: true });
     } catch (error) {
       setErrorMessage(error.message);
     }
   };
 
   return (
-    <div className="auth-container">
-      <h1 className="auth-title">Register</h1>
+    <AuthContainer>
+      <AuthTitle>Register</AuthTitle>
 
       <ErrorMessage message={errorMessage} />
 
-      <form className="auth-form" onSubmit={handleRegister}>
+      <AuthForm onSubmit={handleRegister}>
         <input
           type="text"
           placeholder="Enter your full name (e.g. Yash Joshi)"
@@ -57,7 +69,7 @@ export default function RegisterPage() {
 
         <input
           type="email"
-          placeholder={`Enter your email (only @${allowedDomain})`}
+          placeholder="Enter your email (example@gmail.com)"
           value={emailAddress}
           onChange={(event) => setEmailAddress(event.target.value)}
           required
@@ -65,20 +77,20 @@ export default function RegisterPage() {
 
         <input
           type="password"
-          placeholder="Create password (min 6 characters)"
+          placeholder="Create password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           required
         />
 
-        <button type="submit" className="auth-btn register">
+        <AuthButton type="submit" $variant="register">
           Register
-        </button>
-      </form>
+        </AuthButton>
+      </AuthForm>
 
-      <p className="auth-footer">
+      <AuthFooter>
         Already have an account? <Link to="/">Login</Link>
-      </p>
-    </div>
+      </AuthFooter>
+    </AuthContainer>
   );
 }

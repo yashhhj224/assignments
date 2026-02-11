@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import "../styles/notes.css";
+import { NoteFormBox, FormActions, FormButton, CharCounter } from "../styles/NotesStyles";
 
 export default function NoteForm({ onSubmit, selectedNote, onCancel }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+
+  const TITLE_LIMIT = 120;
 
   useEffect(() => {
     if (selectedNote) {
@@ -17,22 +19,34 @@ export default function NoteForm({ onSubmit, selectedNote, onCancel }) {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
+    if (title.length > TITLE_LIMIT) {
+      alert(`Title cannot exceed ${TITLE_LIMIT} characters.`);
+      return;
+    }
+
     onSubmit({ title, content });
+
     setTitle("");
     setContent("");
   };
 
   return (
-    <form className="note-form" onSubmit={handleSubmit}>
+    <NoteFormBox onSubmit={handleSubmit}>
       <h2>{selectedNote ? "Update Note" : "Create Note"}</h2>
 
       <input
         type="text"
         placeholder="Enter note title (e.g. Shopping List)"
         value={title}
+        maxLength={TITLE_LIMIT}
         onChange={(event) => setTitle(event.target.value)}
         required
       />
+
+      <CharCounter $danger={title.length === TITLE_LIMIT}>
+        {title.length}/{TITLE_LIMIT}
+      </CharCounter>
 
       <textarea
         placeholder="Write your note here... (e.g. Buy milk, eggs, bread)"
@@ -41,17 +55,17 @@ export default function NoteForm({ onSubmit, selectedNote, onCancel }) {
         required
       />
 
-      <div className="form-actions">
-        <button type="submit" className="form-btn save">
+      <FormActions>
+        <FormButton type="submit">
           {selectedNote ? "Update" : "Create"}
-        </button>
+        </FormButton>
 
         {selectedNote && (
-          <button type="button" className="form-btn cancel" onClick={onCancel}>
+          <FormButton type="button" $variant="cancel" onClick={onCancel}>
             Cancel
-          </button>
+          </FormButton>
         )}
-      </div>
-    </form>
+      </FormActions>
+    </NoteFormBox>
   );
 }

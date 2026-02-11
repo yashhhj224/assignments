@@ -1,5 +1,5 @@
-import "../styles/components.css";
+import { LoaderBox } from "../styles/CommonStyles";
 
 export default function Loader() {
-  return <div className="loader-box">Loading...</div>;
+  return <LoaderBox>Loading...</LoaderBox>;
 }
