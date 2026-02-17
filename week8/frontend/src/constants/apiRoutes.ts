@@ -9,7 +9,8 @@ export const API_ROUTES = {
     PROFILE: "/api/profile",
     USERS: "/api/users",
     USER_BY_ID: (id: string) => `/api/users/${id}`,
-    PROFILE_PICTURE: "/profile/picture"
+    PROFILE_PICTURE: "/profile/picture",
+    SEARCH: (query: string) => `/api/users/search?query=${query}`,
   },
 
   FOLLOW: {
@@ -30,5 +31,5 @@ export const API_ROUTES = {
 
   UPLOADS: {
     UPLOAD_IMAGES: "/api/uploads"
-  }
+  },
 } as const;

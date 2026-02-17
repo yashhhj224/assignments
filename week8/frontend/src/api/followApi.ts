@@ -30,3 +30,12 @@ export const getFollowersApi = async (userId: string): Promise<User[]> => {
     method: "GET"
   });
 };
+
+export const getFollowingByUserIdApi = async (
+  userId: string
+): Promise<User[]> => {
+  return sendRequest<User[]>({
+    endpoint: `/api/following/${userId}`,
+    method: "GET"
+  });
+};

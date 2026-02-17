@@ -112,3 +112,18 @@ export const getUserByIdService = async (userId: string) => {
 
   return user;
 };
+
+export const searchUsersService = async (query: string, currentUserId: string) => {
+  if (!query || typeof query !== "string") {
+    return [];
+  }
+
+  const regex = new RegExp(query, "i");
+
+  const users = await User.find({
+    _id: { $ne: currentUserId },
+    username: { $regex: regex }
+  }).select("-password");
+
+  return users;
+};

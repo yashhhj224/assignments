@@ -2,6 +2,7 @@
 import { Request, Response } from "express";
 import { HTTP_STATUS } from "../constants/httpStatus";
 import { MESSAGES } from "../constants/messages";
+import { User } from "../models/User";
 import { asyncHandler } from "../utils/asyncHandler";
 import { successResponse } from "../utils/response";
 import { followUserService, getFollowersService, getFollowingService, unfollowUserService } from "../services/followService";
@@ -43,3 +44,27 @@ export const getFollowersController = asyncHandler(
     successResponse(res, HTTP_STATUS.OK, MESSAGES.FOLLOW.FOLLOWERS_FETCH_SUCCESS, followers);
   }
 );
+
+
+export const getFollowingByUserIdController = async (
+  req: Request,
+  res: Response
+) => {
+  const { userId } = req.params;
+
+  const user = await User.findById(userId)
+    .populate("following", "-password")
+    .select("following");
+
+  if (!user) {
+    return res.status(HTTP_STATUS.NOT_FOUND).json({
+      success: false,
+      message: "User not found"
+    });
+  }
+
+  return res.status(HTTP_STATUS.OK).json({
+    success: true,
+    data: user.following
+  });
+};

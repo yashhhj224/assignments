@@ -54,3 +54,10 @@ export const getUserByIdApi = async (userId: string): Promise<User> => {
     method: "GET"
   });
 };
+
+export const searchUsersApi = async (query: string): Promise<User[]> => {
+  return sendRequest<User[]>({
+    endpoint: API_ROUTES.USER.SEARCH(query),
+    method: "GET"
+  });
+};

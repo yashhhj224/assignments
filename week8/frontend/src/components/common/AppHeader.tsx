@@ -10,6 +10,7 @@ import {
   SecondaryButton,
   UserText
 } from "../../styles/components/layoutStyles";
+import UserSearchBar from "./UserSearchBar";
 
 const AppHeader = () => {
   const navigate = useNavigate();
@@ -36,7 +37,10 @@ const AppHeader = () => {
       <RightSection>
         {isAuthenticated && authUser ? (
           <>
+            <UserSearchBar />
+
             <UserText>@{authUser.username}</UserText>
+            
             <SecondaryButton onClick={handleLogout}>
               Logout
             </SecondaryButton>

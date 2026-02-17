@@ -8,6 +8,7 @@ import {
   updateProfileController,
   updateProfilePicController
 } from "../controllers/userController";
+import { searchUsersController } from "../controllers/userController";
 
 const router = Router();
 
@@ -17,6 +18,9 @@ router.put("/profile", authMiddleware, updateProfileController);
 router.put("/profile/picture", authMiddleware, updateProfilePicController);
 
 router.get("/users", authMiddleware, getAllUsersController);
+
+router.get("/users/search", authMiddleware, searchUsersController);
+
 router.get("/users/:id", authMiddleware, getUserByIdController);
 
 export default router;

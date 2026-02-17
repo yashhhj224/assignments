@@ -1,5 +1,5 @@
 
-import { useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import FeedLayout from "../components/layout/FeedLayout";
 import Loader from "../components/common/Loader";
@@ -24,12 +24,15 @@ import {
   ProfileUserInfo,
   ProfileUsername
 } from "../styles/pages/profilePageStyles";
+import FollowListModal from "../components/users/FollowListModal";
 
 const ProfilePage = () => {
   const { userId } = useParams();
   const { authUser } = useAuth();
 
   const { selectedUser, fetchUserById, isLoading, error } = useUsers();
+
+  const [modalType, setModalType] = useState<"followers" | "following" | null>(null);
 
   const {
     userPosts,
@@ -84,9 +87,15 @@ const ProfilePage = () => {
                 <ProfileEmail>{selectedUser.email}</ProfileEmail>
 
                 <ProfileStats>
-                  <div>{selectedUser.followers.length} Followers</div>
-                  <div>{selectedUser.following.length} Following</div>
+                  <div onClick={() => setModalType("followers")}>
+                    {selectedUser.followers.length} Followers
+                  </div>
+
+                  <div onClick={() => setModalType("following")}>
+                    {selectedUser.following.length} Following
+                  </div>
                 </ProfileStats>
+
               </ProfileUserInfo>
             </ProfileLeft>
 
@@ -117,6 +126,13 @@ const ProfilePage = () => {
           </ProfileLoadMoreButton>
         ) : null}
       </ProfilePageWrapper>
+      {modalType && selectedUser && (
+        <FollowListModal
+          userId={selectedUser._id}
+          type={modalType}
+          onClose={() => setModalType(null)}
+        />
+      )}
     </FeedLayout>
   );
 };

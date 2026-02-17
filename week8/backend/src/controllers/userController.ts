@@ -11,6 +11,7 @@ import {
   updateProfileService,
   updateProfilePicService
 } from "../services/userService";
+import { searchUsersService } from "../services/userService";
 
 export const getProfileController = asyncHandler(
   async (req: Request, res: Response) => {
@@ -82,5 +83,16 @@ export const getUserByIdController = asyncHandler(
       MESSAGES.USER.USER_FETCH_SUCCESS,
       user
     );
+  }
+);
+
+export const searchUsersController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = req.userId as string;
+    const query = req.query.query as string;
+
+    const users = await searchUsersService(query, userId);
+
+    successResponse(res, HTTP_STATUS.OK, MESSAGES.USER.USERS_FETCH_SUCCESS, users);
   }
 );
