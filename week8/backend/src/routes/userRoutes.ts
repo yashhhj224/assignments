@@ -6,7 +6,8 @@ import {
   getProfileController,
   getUserByIdController,
   updateProfileController,
-  updateProfilePicController
+  updateProfilePicController,
+  changePasswordController
 } from "../controllers/userController";
 import { searchUsersController } from "../controllers/userController";
 
@@ -22,5 +23,7 @@ router.get("/users", authMiddleware, getAllUsersController);
 router.get("/users/search", authMiddleware, searchUsersController);
 
 router.get("/users/:id", authMiddleware, getUserByIdController);
+
+router.put("/change-password", authMiddleware, changePasswordController);
 
 export default router;

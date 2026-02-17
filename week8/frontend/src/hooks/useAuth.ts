@@ -7,6 +7,7 @@ import {
   registerUser
 } from "../redux/slices/authSlice";
 import type { LoginRequestBody, RegisterRequestBody } from "../types/auth";
+import { restoreAuthSession, changePassword } from "../redux/slices/authSlice";
 
 export const useAuth = () => {
   const dispatch = useAppDispatch();
@@ -25,12 +26,23 @@ export const useAuth = () => {
     await dispatch(loginUser(payload));
   };
 
+  const changeUserPassword = async (payload: {
+    currentPassword: string;
+    newPassword: string;
+  }) => {
+    return await dispatch(changePassword(payload));
+  };
+
   const logout = () => {
     dispatch(logoutUser());
   };
 
   const clearError = () => {
     dispatch(clearAuthError());
+  };
+
+  const refreshProfile = async () => {
+    await dispatch(restoreAuthSession());
   };
 
   return {
@@ -42,6 +54,8 @@ export const useAuth = () => {
     registerUser: register,
     loginUser: login,
     logoutUser: logout,
-    clearAuthError: clearError
+    clearAuthError: clearError,
+    changePassword: changeUserPassword,
+    refreshProfile
   };
 };

@@ -135,7 +135,7 @@ const postsSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchFeedPosts.fulfilled, (state, action) => {
-        state.feedPosts = action.payload.posts;
+       state.feedPosts = [...state.feedPosts, ...action.payload.posts];
         state.feedPage = action.payload.page;
         state.hasMoreFeed = action.payload.hasMore;
         state.isLoading = false;
@@ -151,7 +151,7 @@ const postsSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchUserPosts.fulfilled, (state, action) => {
-        state.userPosts = action.payload.posts;
+        state.userPosts = [...state.userPosts, ...action.payload.posts];
         state.userPostsPage = action.payload.page;
         state.hasMoreUserPosts = action.payload.hasMore;
         state.isLoading = false;

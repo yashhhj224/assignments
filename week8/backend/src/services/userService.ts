@@ -5,44 +5,76 @@ import { HTTP_STATUS } from "../constants/httpStatus";
 import {
   isNonEmptyString,
   isValidMongoId,
-  normalizeText
+  normalizeText,
+  normalizeEmail
 } from "../utils/validators";
 import { MESSAGES } from "../constants/messages";
+import { comparePassword, hashPassword } from "../utils/hash";
+import { VALIDATION_RULES } from "../constants/validation";
 
 export const getProfileService = async (userId: string) => {
   const user = await User.findById(userId).select("-password");
 
   if (!user) {
-    throw new ApiError(MESSAGES.ERROR.USER_NOT_FOUND, HTTP_STATUS.BAD_REQUEST);
+    throw new ApiError(MESSAGES.ERROR.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
   }
 
   return user;
 };
 
-export const updateProfileService = async (userId: string, payload: any) => {
+export const updateProfileService = async (
+  userId: string,
+  payload: any
+) => {
   if (!payload) {
-    throw new ApiError(
-      MESSAGES.ERROR.REQUEST_BODY_REQUIRED,
-      HTTP_STATUS.BAD_REQUEST
-    );
+    throw new ApiError(MESSAGES.ERROR.REQUEST_BODY_REQUIRED, HTTP_STATUS.BAD_REQUEST);
   }
 
   const updates: Record<string, string> = {};
 
   if (payload.username !== undefined) {
     if (!isNonEmptyString(payload.username)) {
-      throw new ApiError(
-        MESSAGES.ERROR.USERNAME_CANNOT_BE_EMPTY,
-        HTTP_STATUS.BAD_REQUEST
-      );
+      throw new ApiError(MESSAGES.ERROR.USERNAME_CANNOT_BE_EMPTY, HTTP_STATUS.BAD_REQUEST);
     }
 
-    updates.username = normalizeText(payload.username);
+    const normalizedUsername = normalizeText(payload.username);
+
+    const existingUser = await User.findOne({
+      username: normalizedUsername,
+      _id: { $ne: userId }
+    });
+
+    if (existingUser) {
+      throw new ApiError("Username already taken", HTTP_STATUS.BAD_REQUEST);
+    }
+
+    updates.username = normalizedUsername;
   }
 
-  const updatedUser = await User.findByIdAndUpdate(userId, updates, {
-    new: true
-  }).select("-password");
+  if (payload.email !== undefined) {
+    if (!isNonEmptyString(payload.email)) {
+      throw new ApiError(MESSAGES.ERROR.EMAIL_REQUIRED, HTTP_STATUS.BAD_REQUEST);
+    }
+
+    const normalizedEmail = normalizeEmail(payload.email);
+
+    const existingEmail = await User.findOne({
+      email: normalizedEmail,
+      _id: { $ne: userId }
+    });
+
+    if (existingEmail) {
+      throw new ApiError("Email already in use", HTTP_STATUS.BAD_REQUEST);
+    }
+
+    updates.email = normalizedEmail;
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    updates,
+    { returnDocument: "after" }
+  ).select("-password");
 
   if (!updatedUser) {
     throw new ApiError(MESSAGES.ERROR.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
@@ -85,7 +117,7 @@ export const updateProfilePicService = async (userId: string, payload: any) => {
   const updatedUser = await User.findByIdAndUpdate(
     userId,
     { profilePic },
-    { new: true }
+    { returnDocument: "after" }
   ).select("-password");
 
   if (!updatedUser) {
@@ -118,7 +150,7 @@ export const searchUsersService = async (query: string, currentUserId: string) =
     return [];
   }
 
-  const regex = new RegExp(query, "i");
+  const regex = new RegExp(query, "i"); // case-insensitive
 
   const users = await User.find({
     _id: { $ne: currentUserId },
@@ -126,4 +158,31 @@ export const searchUsersService = async (query: string, currentUserId: string) =
   }).select("-password");
 
   return users;
+};
+
+export const changePasswordService = async (
+  userId: string,
+  currentPassword: string,
+  newPassword: string
+) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new ApiError(MESSAGES.ERROR.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+  }
+
+  const isMatch = await comparePassword(currentPassword, user.password);
+
+  if (!isMatch) {
+    throw new ApiError("Current password is incorrect", HTTP_STATUS.BAD_REQUEST);
+  }
+
+  if (newPassword.length < VALIDATION_RULES.PASSWORD_MIN_LENGTH) {
+    throw new ApiError("New password too short", HTTP_STATUS.BAD_REQUEST);
+  }
+
+  user.password = await hashPassword(newPassword);
+  await user.save();
+
+  return true;
 };

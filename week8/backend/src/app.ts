@@ -28,10 +28,6 @@ app.use(express.json());
 
 const uploadsPath = path.join(__dirname, "..", "uploads");
 
-if (!fs.existsSync(uploadsPath)) {
-  fs.mkdirSync(uploadsPath);
-}
-
 app.use("/uploads", express.static(uploadsPath));
 
 app.use("/api", authRoutes);

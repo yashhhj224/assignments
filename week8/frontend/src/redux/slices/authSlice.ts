@@ -2,8 +2,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { AuthResponseData, LoginRequestBody, RegisterRequestBody } from "../../types/auth";
 import { parseApiErrorMessage } from "../../utils/errorParser";
-import { getProfileApi } from "../../api/userApi";
-import { loginUserApi, registerUserApi } from "../../api/authApi";
+import { getProfileApi, changePasswordApi } from "../../api/userApi";
 import {
   clearAuthStorage,
   getAuthToken,
@@ -11,6 +10,7 @@ import {
   saveAuthToken,
   saveAuthUser
 } from "../../utils/storage";
+import { loginUserApi, registerUserApi } from "../../api/authApi";
 
 type AuthState = {
   authUser: AuthResponseData["user"] | null;
@@ -57,6 +57,19 @@ export const loginUser = createAsyncThunk<
     saveAuthUser(response.user);
 
     return response;
+  } catch (error) {
+    return thunkApi.rejectWithValue(parseApiErrorMessage(error));
+  }
+});
+
+export const changePassword = createAsyncThunk<
+  boolean,
+  { currentPassword: string; newPassword: string },
+  { rejectValue: string }
+>("auth/changePassword", async (payload, thunkApi) => {
+  try {
+    await changePasswordApi(payload);
+    return true;
   } catch (error) {
     return thunkApi.rejectWithValue(parseApiErrorMessage(error));
   }
@@ -175,13 +188,24 @@ const authSlice = createSlice({
         state.isAuthLoading = false;
         state.authError = action.payload || "Something went wrong";
       })
-
       .addCase(logoutUser.fulfilled, (state) => {
         state.authUser = null;
         state.token = null;
         state.isAuthenticated = false;
         state.isAuthLoading = false;
         state.authError = null;
+      })
+      .addCase(changePassword.pending, (state) => {
+        state.isAuthLoading = true;
+        state.authError = null;
+      })
+      .addCase(changePassword.fulfilled, (state) => {
+        state.isAuthLoading = false;
+        state.authError = null;
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.isAuthLoading = false;
+        state.authError = action.payload || "Something went wrong";
       });
   }
 });

@@ -10,6 +10,7 @@ import CreatePostPage from "../pages/CreatePostPage";
 import EditPostPage from "../pages/EditPostPage";
 import { useAuth } from "../hooks/useAuth";
 import Loader from "../components/common/Loader";
+import SettingsPage from "../pages/SettingsPage";
 
 const AppRoutes = () => {
   const { isAuthenticated, isAuthLoading } = useAuth();
@@ -74,6 +75,15 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <EditPostPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <SettingsPage />
             </ProtectedRoute>
           }
         />

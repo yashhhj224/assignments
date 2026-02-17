@@ -1,7 +1,6 @@
 
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-
 import {
   SidebarButton,
   SidebarWrapper
@@ -26,6 +25,11 @@ const Sidebar = () => {
           My Profile
         </SidebarButton>
       ) : null}
+
+      <SidebarButton onClick={() => navigate("/settings")}>
+        Settings
+      </SidebarButton>
+
     </SidebarWrapper>
   );
 };

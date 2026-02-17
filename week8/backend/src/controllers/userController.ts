@@ -9,9 +9,10 @@ import {
   getProfileService,
   getUserByIdService,
   updateProfileService,
-  updateProfilePicService
+  updateProfilePicService,
+  searchUsersService,
+  changePasswordService
 } from "../services/userService";
-import { searchUsersService } from "../services/userService";
 
 export const getProfileController = asyncHandler(
   async (req: Request, res: Response) => {
@@ -94,5 +95,16 @@ export const searchUsersController = asyncHandler(
     const users = await searchUsersService(query, userId);
 
     successResponse(res, HTTP_STATUS.OK, MESSAGES.USER.USERS_FETCH_SUCCESS, users);
+  }
+);
+
+export const changePasswordController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = req.userId as string;
+    const { currentPassword, newPassword } = req.body;
+
+    await changePasswordService(userId, currentPassword, newPassword);
+
+    successResponse(res, HTTP_STATUS.OK, "Password updated successfully");
   }
 );

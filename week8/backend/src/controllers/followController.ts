@@ -45,7 +45,6 @@ export const getFollowersController = asyncHandler(
   }
 );
 
-
 export const getFollowingByUserIdController = async (
   req: Request,
   res: Response

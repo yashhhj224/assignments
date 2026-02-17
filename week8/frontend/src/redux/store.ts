@@ -4,13 +4,15 @@ import authReducer from "./slices/authSlice";
 import followReducer from "./slices/followSlice";
 import postsReducer from "./slices/postsSlice";
 import usersReducer from "./slices/usersSlice";
+import toastReducer from "./slices/toastSlice";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     follow: followReducer,
     posts: postsReducer,
-    users: usersReducer
+    users: usersReducer,
+    toast: toastReducer
   }
 });
 
