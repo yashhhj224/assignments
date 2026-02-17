@@ -1,69 +1,23 @@
 
 import { useEffect, useState } from "react";
-import styled from "styled-components";
 import { useAuth } from "../../hooks/useAuth";
 import ErrorMessage from "../common/ErrorMessage";
-import { isValidEmail, isValidPassword, isValidUsername, normalizeEmail, normalizeText } from "../../utils/validators";
+import {
+  isValidEmail,
+  isValidPassword,
+  isValidUsername,
+  normalizeEmail,
+  normalizeText
+} from "../../utils/validators";
 
-const Wrapper = styled.div`
-  width: 100%;
-  max-width: 420px;
-  background: ${({ theme }) => theme.colors.surface};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.radius.lg};
-  padding: ${({ theme }) => theme.spacing.xl};
-  box-shadow: ${({ theme }) => theme.shadow.card};
-`;
-
-const Title = styled.h2`
-  font-size: ${({ theme }) => theme.fontSize.xl};
-  margin-bottom: ${({ theme }) => theme.spacing.md};
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.md};
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: ${({ theme }) => theme.radius.md};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background: ${({ theme }) => theme.colors.surfaceLight};
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font-size: ${({ theme }) => theme.fontSize.sm};
-
-  &:focus {
-    border: 1px solid ${({ theme }) => theme.colors.primary};
-  }
-`;
-
-const Button = styled.button`
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: ${({ theme }) => theme.radius.md};
-  background: ${({ theme }) => theme.colors.primary};
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font-size: ${({ theme }) => theme.fontSize.sm};
-  font-weight: 700;
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-const Label = styled.label`
-  font-size: ${({ theme }) => theme.fontSize.sm};
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font-weight: 600;
-`;
+import {
+  AuthButton,
+  AuthForm,
+  AuthFormTitle,
+  AuthFormWrapper,
+  AuthInput,
+  AuthLabel
+} from "../../styles/components/authFormStyles";
 
 type RegisterFormState = {
   username: string;
@@ -159,15 +113,15 @@ const RegisterForm = () => {
   }, [authError]);
 
   return (
-    <Wrapper>
-      <Title>Register</Title>
+    <AuthFormWrapper>
+      <AuthFormTitle>Register</AuthFormTitle>
 
-      <Form onSubmit={handleSubmit}>
+      <AuthForm onSubmit={handleSubmit}>
         {state.error ? <ErrorMessage message={state.error} /> : null}
 
         <div>
-          <Label>Username</Label>
-          <Input
+          <AuthLabel>Username</AuthLabel>
+          <AuthInput
             type="text"
             value={state.username}
             placeholder="Enter username"
@@ -176,8 +130,8 @@ const RegisterForm = () => {
         </div>
 
         <div>
-          <Label>Email</Label>
-          <Input
+          <AuthLabel>Email</AuthLabel>
+          <AuthInput
             type="email"
             value={state.email}
             placeholder="Enter email"
@@ -186,8 +140,8 @@ const RegisterForm = () => {
         </div>
 
         <div>
-          <Label>Password</Label>
-          <Input
+          <AuthLabel>Password</AuthLabel>
+          <AuthInput
             type="password"
             value={state.password}
             placeholder="Enter password"
@@ -196,8 +150,8 @@ const RegisterForm = () => {
         </div>
 
         <div>
-          <Label>Profile Picture URL (Optional)</Label>
-          <Input
+          <AuthLabel>Profile Picture URL (Optional)</AuthLabel>
+          <AuthInput
             type="text"
             value={state.profilePic}
             placeholder="Paste image url"
@@ -205,11 +159,11 @@ const RegisterForm = () => {
           />
         </div>
 
-        <Button disabled={isAuthLoading} type="submit">
+        <AuthButton disabled={isAuthLoading} type="submit">
           {isAuthLoading ? "Creating account..." : "Register"}
-        </Button>
-      </Form>
-    </Wrapper>
+        </AuthButton>
+      </AuthForm>
+    </AuthFormWrapper>
   );
 };
 

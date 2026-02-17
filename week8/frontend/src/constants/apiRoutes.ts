@@ -8,7 +8,8 @@ export const API_ROUTES = {
   USER: {
     PROFILE: "/api/profile",
     USERS: "/api/users",
-    USER_BY_ID: (id: string) => `/api/users/${id}`
+    USER_BY_ID: (id: string) => `/api/users/${id}`,
+    PROFILE_PICTURE: "/profile/picture"
   },
 
   FOLLOW: {

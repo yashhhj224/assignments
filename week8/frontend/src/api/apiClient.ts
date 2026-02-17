@@ -1,10 +1,11 @@
 
 import type { ApiResponse } from "../types/api";
 import { getAuthToken, clearAuthStorage } from "../utils/storage";
-
-const BASE_URL = "http://localhost:5000";
+import { CONFIG } from "../constants/config";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
+
+const BASE_URL = CONFIG.BASE_URL;
 
 export class ApiError extends Error {
   public statusCode: number;
@@ -88,3 +89,5 @@ export const sendRequest = async <TResponse, TBody = unknown>(
 
   return result.data;
 };
+
+export default sendRequest;

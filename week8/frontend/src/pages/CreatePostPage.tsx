@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
 import FeedLayout from "../components/layout/FeedLayout";
 import ErrorMessage from "../components/common/ErrorMessage";
 import { PostForm } from "../components/posts/PostForm";
@@ -9,11 +8,7 @@ import { usePosts } from "../hooks/usePosts";
 import { useUpload } from "../hooks/useUpload";
 import { normalizeTags, normalizeText } from "../utils/validators";
 
-const Wrapper = styled.div`
-  width: 100%;
-  max-width: 720px;
-  margin: auto;
-`;
+import { PostFormPageWrapper } from "../styles/pages/postFormPageStyles";
 
 const CreatePostPage = () => {
   const navigate = useNavigate();
@@ -50,6 +45,8 @@ const CreatePostPage = () => {
       return;
     }
 
+    console.log("IMAGES BEING SENT:", images);
+
     const createdPost = await createPost({
       title,
       content,
@@ -64,7 +61,7 @@ const CreatePostPage = () => {
 
   return (
     <FeedLayout>
-      <Wrapper>
+      <PostFormPageWrapper>
         {error ? <ErrorMessage message={error} /> : null}
         {localError ? <ErrorMessage message={localError} /> : null}
 
@@ -77,7 +74,7 @@ const CreatePostPage = () => {
           onSelectImages={handleSelectImages}
           selectedImagesCount={images.length}
         />
-      </Wrapper>
+      </PostFormPageWrapper>
     </FeedLayout>
   );
 };

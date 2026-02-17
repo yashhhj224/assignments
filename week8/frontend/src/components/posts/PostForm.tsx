@@ -1,5 +1,14 @@
 
-import styled from "styled-components";
+import {
+  PostFormContainer,
+  PostFormField,
+  PostFormFileInput,
+  PostFormImageInfo,
+  PostFormInput,
+  PostFormLabel,
+  PostFormSubmitButton,
+  PostFormTextArea
+} from "../../styles/components/postStyles";
 
 type PostFormValues = {
   title: string;
@@ -46,127 +55,52 @@ export const PostForm = ({
   };
 
   return (
-    <FormContainer>
-      <Field>
-        <Label>Title</Label>
-        <Input
+    <PostFormContainer>
+      <PostFormField>
+        <PostFormLabel>Title</PostFormLabel>
+        <PostFormInput
           value={values.title}
           onChange={(e) => handleInputChange("title", e.target.value)}
           placeholder="Enter post title"
         />
-      </Field>
+      </PostFormField>
 
-      <Field>
-        <Label>Content</Label>
-        <TextArea
+      <PostFormField>
+        <PostFormLabel>Content</PostFormLabel>
+        <PostFormTextArea
           value={values.content}
           onChange={(e) => handleInputChange("content", e.target.value)}
           placeholder="Write something..."
         />
-      </Field>
+      </PostFormField>
 
-      <Field>
-        <Label>Tags (comma separated)</Label>
-        <Input
+      <PostFormField>
+        <PostFormLabel>Tags (comma separated)</PostFormLabel>
+        <PostFormInput
           value={values.tags}
           onChange={(e) => handleInputChange("tags", e.target.value)}
           placeholder="example: health, fitness, coding"
         />
-      </Field>
+      </PostFormField>
 
-      <Field>
-        <Label>Images</Label>
-        <FileInput type="file" multiple accept="image/*" onChange={handleImageChange} />
-        <ImageInfo>
+      <PostFormField>
+        <PostFormLabel>Images</PostFormLabel>
+        <PostFormFileInput
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={handleImageChange}
+        />
+        <PostFormImageInfo>
           {selectedImagesCount > 0
             ? `${selectedImagesCount} image(s) selected`
             : "No images selected"}
-        </ImageInfo>
-      </Field>
+        </PostFormImageInfo>
+      </PostFormField>
 
-      <SubmitButton disabled={isSubmitting} onClick={onSubmit}>
+      <PostFormSubmitButton disabled={isSubmitting} onClick={onSubmit}>
         {isSubmitting ? "Submitting..." : submitText}
-      </SubmitButton>
-    </FormContainer>
+      </PostFormSubmitButton>
+    </PostFormContainer>
   );
 };
-
-const FormContainer = styled.div`
-  width: 100%;
-  padding: 16px;
-  border-radius: 14px;
-  border: 1px solid #ddd;
-  background: #fff;
-
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-`;
-
-const Field = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-`;
-
-const Label = styled.label`
-  font-size: 13px;
-  font-weight: 700;
-  color: #111;
-`;
-
-const Input = styled.input`
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  outline: none;
-
-  &:focus {
-    border-color: #111;
-  }
-`;
-
-const TextArea = styled.textarea`
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  outline: none;
-  min-height: 160px;
-  resize: vertical;
-
-  &:focus {
-    border-color: #111;
-  }
-`;
-
-const FileInput = styled.input`
-  font-size: 14px;
-`;
-
-const ImageInfo = styled.p`
-  margin: 0;
-  font-size: 12px;
-  color: #666;
-`;
-
-const SubmitButton = styled.button`
-  padding: 12px;
-  border-radius: 12px;
-  border: none;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 14px;
-  background: #111;
-  color: #fff;
-
-  &:hover {
-    background: #333;
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-`;

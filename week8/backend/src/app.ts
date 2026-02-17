@@ -2,21 +2,37 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
+import fs from "fs";
+
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import followRoutes from "./routes/followRoutes";
 import postRoutes from "./routes/postRoutes";
 import uploadRoutes from "./routes/uploadRoutes";
+
 import { errorMiddleware } from "./middlewares/errorMiddleware";
 import { HTTP_STATUS } from "./constants/httpStatus";
 import { MESSAGES } from "./constants/messages";
 
 const app = express();
 
-app.use(cors({ origin: "*" }));
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+  })
+);
+
 app.use(express.json());
 
-app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
+const uploadsPath = path.join(__dirname, "..", "uploads");
+
+if (!fs.existsSync(uploadsPath)) {
+  fs.mkdirSync(uploadsPath);
+}
+
+app.use("/uploads", express.static(uploadsPath));
 
 app.use("/api", authRoutes);
 app.use("/api", userRoutes);

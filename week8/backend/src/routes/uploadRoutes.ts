@@ -7,7 +7,9 @@ import { UPLOAD_CONSTANTS } from "../constants/upload";
 
 const router = Router();
 
-router.post("/uploads", authMiddleware,
+router.post(
+  "/uploads",
+  authMiddleware,
   upload.array("images", UPLOAD_CONSTANTS.MAX_FILES),
   uploadImagesController
 );

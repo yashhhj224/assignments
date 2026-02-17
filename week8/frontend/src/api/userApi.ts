@@ -31,6 +31,16 @@ export const updateProfileApi = async (
   });
 };
 
+export const updateProfilePictureApi = async (
+  profilePic: string
+): Promise<User> => {
+  return sendRequest<User, { profilePic: string }>({
+    endpoint: "/profile/picture",
+    method: "PUT",
+    body: { profilePic: normalizeText(profilePic) }
+  });
+};
+
 export const getAllUsersApi = async (): Promise<User[]> => {
   return sendRequest<User[]>({
     endpoint: API_ROUTES.USER.USERS,

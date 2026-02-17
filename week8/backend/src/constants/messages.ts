@@ -8,6 +8,7 @@ export const MESSAGES = {
   USER: {
     PROFILE_FETCH_SUCCESS: "Profile fetched successfully",
     PROFILE_UPDATE_SUCCESS: "Profile updated successfully",
+    PROFILE_PIC_UPDATE_SUCCESS: "Profile picture updated successfully",
     USERS_FETCH_SUCCESS: "Users fetched successfully",
     USER_FETCH_SUCCESS: "User fetched successfully"
   },
@@ -29,7 +30,8 @@ export const MESSAGES = {
   },
 
   UPLOAD: {
-    UPLOAD_SUCCESS: "Images uploaded successfully"
+    UPLOAD_SUCCESS: "Images uploaded successfully",
+    NO_FILES: "No images uploaded"
   },
 
   ROUTE: {
@@ -74,6 +76,10 @@ export const MESSAGES = {
     NOT_FOLLOWING: "You are not following this user",
 
     IMAGES_MUST_BE_ARRAY: "Images must be an array",
-    ONLY_IMAGE_FILES_ALLOWED: "Only image files are allowed"
+    INVALID_IMAGE_FILE: "Invalid image file uploaded",
+    ONLY_IMAGE_FILES_ALLOWED: "Only image files are allowed",
+    PROFILE_PIC_REQUIRED: "Profile picture is required",
+    BASE64_NOT_ALLOWED: "Base64 images are not allowed. Please upload image file.",
+    INVALID_PROFILE_PIC_URL: "Invalid profile picture url"
   }
 } as const;

@@ -1,22 +1,17 @@
 
+import { useEffect } from "react";
 import AppRoutes from "./routes/AppRoutes";
-import { AuthProvider } from "./features/auth/authContext";
-import { FollowProvider } from "./features/follow/followContext";
-import { PostsProvider } from "./features/posts/postsContext";
-import { UsersProvider } from "./features/users/usersContext";
+import { useAppDispatch } from "./redux/hooks";
+import { restoreAuthSession } from "./redux/slices/authSlice";
 
 const App = () => {
-  return (
-    <AuthProvider>
-      <FollowProvider>
-        <UsersProvider>
-          <PostsProvider>
-            <AppRoutes />
-          </PostsProvider>
-        </UsersProvider>
-      </FollowProvider>
-    </AuthProvider>
-  );
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(restoreAuthSession());
+  }, [dispatch]);
+
+  return <AppRoutes />;
 };
 
 export default App;

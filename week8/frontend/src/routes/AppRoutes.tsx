@@ -1,7 +1,6 @@
 
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "../components/common/ProtectedRoute";
-
 import FeedPage from "../pages/FeedPage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
@@ -9,7 +8,6 @@ import ProfilePage from "../pages/ProfilePage";
 import PostDetailPage from "../pages/PostDetailPage";
 import CreatePostPage from "../pages/CreatePostPage";
 import EditPostPage from "../pages/EditPostPage";
-
 import { useAuth } from "../hooks/useAuth";
 import Loader from "../components/common/Loader";
 
@@ -30,7 +28,9 @@ const AppRoutes = () => {
 
         <Route
           path="/register"
-          element={isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />}
+          element={
+            isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />
+          }
         />
 
         <Route

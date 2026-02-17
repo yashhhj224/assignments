@@ -1,7 +1,6 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import styled from "styled-components";
 import FeedLayout from "../components/layout/FeedLayout";
 import Loader from "../components/common/Loader";
 import ErrorMessage from "../components/common/ErrorMessage";
@@ -10,11 +9,7 @@ import { usePosts } from "../hooks/usePosts";
 import { useUpload } from "../hooks/useUpload";
 import { normalizeTags, normalizeText } from "../utils/validators";
 
-const Wrapper = styled.div`
-  width: 100%;
-  max-width: 720px;
-  margin: auto;
-`;
+import { PostFormPageWrapper } from "../styles/pages/postFormPageStyles";
 
 const EditPostPage = () => {
   const { postId } = useParams();
@@ -96,7 +91,7 @@ const EditPostPage = () => {
 
   return (
     <FeedLayout>
-      <Wrapper>
+      <PostFormPageWrapper>
         {error ? <ErrorMessage message={error} /> : null}
         {localError ? <ErrorMessage message={localError} /> : null}
 
@@ -109,7 +104,7 @@ const EditPostPage = () => {
           onSelectImages={handleSelectImages}
           selectedImagesCount={images.length}
         />
-      </Wrapper>
+      </PostFormPageWrapper>
     </FeedLayout>
   );
 };

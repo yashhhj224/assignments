@@ -33,7 +33,25 @@ const postSchema = new Schema<IPost>(
     },
     images: {
       type: [String],
-      default: []
+      default: [],
+      validate: {
+        validator: function (value: string[]) {
+          if (!Array.isArray(value)) return false;
+
+          return value.every((url) => {
+            if (typeof url !== "string") return false;
+
+            return (
+              url.startsWith("/uploads/") &&
+              (url.endsWith(".jpg") ||
+                url.endsWith(".jpeg") ||
+                url.endsWith(".png") ||
+                url.endsWith(".webp"))
+            );
+          });
+        },
+        message: "Invalid image url format"
+      }
     },
     tags: {
       type: [String],
