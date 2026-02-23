@@ -1,25 +1,48 @@
 
-import AppHeader from "../common/AppHeader";
-import Sidebar from "../common/Sidebar";
+import styled from "styled-components";
+import { Outlet } from "react-router-dom";
+import Header from "./Header";
+import Sidebar from "./Sidebar";
 
-import {
-  BodyWrapper,
-  LayoutWrapper,
-  MainContent
-} from "../../styles/components/layoutStyles";
+const LayoutWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+`;
 
-type FeedLayoutProps = {
-  children: React.ReactNode;
-};
+const ContentWrapper = styled.div`
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+`;
 
-const FeedLayout = ({ children }: FeedLayoutProps) => {
+const SidebarWrapper = styled.div`
+  width: 240px;
+  background: white;
+  border-right: 1px solid #e5e7eb;
+`;
+
+const BodyWrapper = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 40px 60px;
+  background: #f3f4f6;
+`;
+
+const FeedLayout = () => {
   return (
     <LayoutWrapper>
-      <AppHeader />
-      <BodyWrapper>
-        <Sidebar />
-        <MainContent>{children}</MainContent>
-      </BodyWrapper>
+      <Header />
+
+      <ContentWrapper>
+        <SidebarWrapper>
+          <Sidebar />
+        </SidebarWrapper>
+
+        <BodyWrapper>
+          <Outlet />
+        </BodyWrapper>
+      </ContentWrapper>
     </LayoutWrapper>
   );
 };

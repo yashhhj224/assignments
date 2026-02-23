@@ -1,98 +1,31 @@
 
-import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import FeedLayout from "../components/layout/FeedLayout";
-import Loader from "../components/common/Loader";
-import ErrorMessage from "../components/common/ErrorMessage";
-import PostImageGallery from "../components/posts/PostImageGallery";
-import { usePosts } from "../hooks/usePosts";
-import { formatDateTime } from "../utils/formatters";
-import { useAuth } from "../hooks/useAuth";
+import styled from "styled-components";
+import { useParams } from "react-router-dom";
+import PostDetail from "../components/posts/PostDetail";
 
-import {
-  PostDetailAuthor,
-  PostDetailButtonRow,
-  PostDetailCard,
-  PostDetailContent,
-  PostDetailDangerButton,
-  PostDetailDateText,
-  PostDetailPrimaryButton,
-  PostDetailTitle,
-  PostDetailWrapper
-} from "../styles/pages/postDetailPageStyles";
+const Wrapper = styled.div`
+  min-height: 100vh;
+  background: #f3f4f6;
+  padding: 10px 10px;
+`;
+
+const Container = styled.div`
+  max-width: 1200px;
+  margin: auto;
+  padding: 0
+`;
 
 const PostDetailPage = () => {
-  const { postId } = useParams();
-  const navigate = useNavigate();
+  const { id } = useParams();
 
-  const { authUser } = useAuth();
-  const { selectedPost, fetchPostById, isLoading, error, deletePost } =
-    usePosts();
-
-  useEffect(() => {
-    if (!postId) return;
-    fetchPostById(postId);
-  }, [postId]);
-
-  const handleAuthorClick = () => {
-    if (!selectedPost) return;
-    navigate(`/profile/${selectedPost.author._id}`);
-  };
-
-  const handleEdit = () => {
-    if (!selectedPost) return;
-    navigate(`/edit-post/${selectedPost._id}`);
-  };
-
-  const handleDelete = async () => {
-    if (!selectedPost) return;
-
-    const deleted = await deletePost(selectedPost._id);
-
-    if (deleted) {
-      navigate("/", { replace: true });
-    }
-  };
-
-  const canEditOrDelete = selectedPost?.author._id === authUser?.id;
+  if (!id) return null;
 
   return (
-    <FeedLayout>
-      <PostDetailWrapper>
-        {error ? <ErrorMessage message={error} /> : null}
-
-        {isLoading && !selectedPost ? <Loader /> : null}
-
-        {selectedPost ? (
-          <PostDetailCard>
-            <PostDetailTitle>{selectedPost.title}</PostDetailTitle>
-
-            <PostDetailAuthor onClick={handleAuthorClick}>
-              @{selectedPost.author.username}
-            </PostDetailAuthor>
-
-            <PostDetailDateText>
-              {formatDateTime(selectedPost.createdAt)}
-            </PostDetailDateText>
-
-            <PostDetailContent>{selectedPost.content}</PostDetailContent>
-
-            <PostImageGallery images={selectedPost.images} />
-
-            {canEditOrDelete ? (
-              <PostDetailButtonRow>
-                <PostDetailPrimaryButton onClick={handleEdit}>
-                  Edit
-                </PostDetailPrimaryButton>
-                <PostDetailDangerButton onClick={handleDelete}>
-                  Delete
-                </PostDetailDangerButton>
-              </PostDetailButtonRow>
-            ) : null}
-          </PostDetailCard>
-        ) : null}
-      </PostDetailWrapper>
-    </FeedLayout>
+    <Wrapper>
+      <Container>
+        <PostDetail postId={id} />
+      </Container>
+    </Wrapper>
   );
 };
 

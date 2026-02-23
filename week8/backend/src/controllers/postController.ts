@@ -65,16 +65,35 @@ export const deletePostController = asyncHandler(
 
 export const getPostByIdController = asyncHandler(
   async (req: Request, res: Response) => {
-    const post = await getPostByIdService(req.params.id);
+    const userId = req.userId as string;
+    const postId = req.params.id;
 
-    successResponse(res, HTTP_STATUS.OK, MESSAGES.POST.POST_FETCHED, post);
+    const post = await getPostByIdService(
+      userId,
+      postId
+    );
+
+    successResponse(
+      res,
+      HTTP_STATUS.OK,
+      MESSAGES.POST.POST_FETCHED,
+      post
+    );
   }
 );
 
 export const getPostsByUserController = asyncHandler(
   async (req: Request, res: Response) => {
-    const page = Number(req.query.page) || VALIDATION_RULES.FEED_DEFAULT_PAGE;
-    const limit = Number(req.query.limit) || VALIDATION_RULES.FEED_DEFAULT_LIMIT;
+    const currentUserId = req.userId as string;
+    const profileUserId = req.params.userId;
+
+    const page =
+      Number(req.query.page) ||
+      VALIDATION_RULES.FEED_DEFAULT_PAGE;
+
+    const limit =
+      Number(req.query.limit) ||
+      VALIDATION_RULES.FEED_DEFAULT_LIMIT;
 
     const safePage =
       page < VALIDATION_RULES.FEED_DEFAULT_PAGE
@@ -88,8 +107,18 @@ export const getPostsByUserController = asyncHandler(
         ? VALIDATION_RULES.FEED_MAX_LIMIT
         : limit;
 
-    const posts = await getPostsByUserService(req.params.userId, safePage, safeLimit);
+    const posts = await getPostsByUserService(
+      currentUserId,
+      profileUserId,
+      safePage,
+      safeLimit
+    );
 
-    successResponse(res, HTTP_STATUS.OK, MESSAGES.POST.USER_POSTS_FETCHED, posts);
+    successResponse(
+      res,
+      HTTP_STATUS.OK,
+      MESSAGES.POST.USER_POSTS_FETCHED,
+      posts
+    );
   }
 );

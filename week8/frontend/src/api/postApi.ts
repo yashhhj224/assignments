@@ -1,94 +1,103 @@
 
-import { API_ROUTES } from "../constants/apiRoutes";
-import type {
-  CreatePostRequestBody,
-  Post,
-  UpdatePostRequestBody
-} from "../types/post";
-import { normalizeTags, normalizeText } from "../utils/validators";
-import { sendRequest } from "./apiClient";
+const BASE_URL = "http://localhost:5000/api";
 
-export const getFeedApi = async (
-  page: number,
-  limit: number
-): Promise<Post[]> => {
-  return sendRequest<Post[]>({
-    endpoint: `${API_ROUTES.POSTS.FEED}?page=${page}&limit=${limit}`,
-    method: "GET"
-  });
-};
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("token");
 
-export const createPostApi = async (
-  payload: CreatePostRequestBody
-): Promise<Post> => {
-  const safePayload: CreatePostRequestBody = {
-    title: normalizeText(payload.title),
-    content: normalizeText(payload.content),
-    images: Array.isArray(payload.images)
-      ? payload.images.map((img) => normalizeText(img))
-      : [],
-    tags: normalizeTags(payload.tags)
+  return {
+    Authorization: `Bearer ${token}`
   };
+};
 
-  return sendRequest<Post, CreatePostRequestBody>({
-    endpoint: API_ROUTES.POSTS.CREATE,
+export const fetchFeedApi = async (page: number = 1) => {
+  const response = await fetch(
+    `${BASE_URL}/posts/feed?page=${page}&limit=10`,
+    {
+      headers: getAuthHeaders()
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to fetch feed");
+  }
+
+  return data.data;
+};
+
+export const fetchPostByIdApi = async (postId: string) => {
+  const response = await fetch(
+    `${BASE_URL}/posts/${postId}`,
+    {
+      headers: getAuthHeaders()
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to fetch post");
+  }
+
+  return data.data;
+};
+
+export const createPostApi = async (payload: {
+  title: string;
+  content: string;
+  tags: string[];
+  images: string[];
+}) => {
+  const response = await fetch(`${BASE_URL}/posts`, {
     method: "POST",
-    body: safePayload
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders()
+    },
+    body: JSON.stringify(payload)
   });
-};
 
-export const updatePostApi = async (
-  postId: string,
-  payload: UpdatePostRequestBody
-): Promise<Post> => {
-  const safePayload: UpdatePostRequestBody = {};
+  const data = await response.json();
 
-  if (payload.title !== undefined) {
-    safePayload.title = normalizeText(payload.title);
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to create post");
   }
 
-  if (payload.content !== undefined) {
-    safePayload.content = normalizeText(payload.content);
-  }
-
-  if (payload.images !== undefined) {
-    safePayload.images = Array.isArray(payload.images)
-      ? payload.images.map((img) => normalizeText(img))
-      : [];
-  }
-
-  if (payload.tags !== undefined) {
-    safePayload.tags = normalizeTags(payload.tags);
-  }
-
-  return sendRequest<Post, UpdatePostRequestBody>({
-    endpoint: API_ROUTES.POSTS.UPDATE(postId),
-    method: "PUT",
-    body: safePayload
-  });
+  return data.data;
 };
 
-export const deletePostApi = async (postId: string): Promise<void> => {
-  await sendRequest<null>({
-    endpoint: API_ROUTES.POSTS.DELETE(postId),
-    method: "DELETE"
-  });
+export const fetchPostsByUserApi = async (userId: string) => {
+  const response = await fetch(
+    `${BASE_URL}/posts/user/${userId}`,
+    {
+      headers: getAuthHeaders()
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to fetch user posts");
+  }
+
+  return data.data;
 };
 
-export const getPostByIdApi = async (postId: string): Promise<Post> => {
-  return sendRequest<Post>({
-    endpoint: API_ROUTES.POSTS.POST_BY_ID(postId),
-    method: "GET"
-  });
-};
+export const toggleLikeApi = async (postId: string) => {
+  const response = await fetch(
+    `${BASE_URL}/posts/${postId}/like`,
+    {
+      method: "POST",
+      headers: getAuthHeaders()
+    }
+  );
 
-export const getPostsByUserApi = async (
-  userId: string,
-  page: number,
-  limit: number
-): Promise<Post[]> => {
-  return sendRequest<Post[]>({
-    endpoint: `${API_ROUTES.POSTS.POSTS_BY_USER(userId)}?page=${page}&limit=${limit}`,
-    method: "GET"
-  });
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to toggle like");
+  }
+
+  return data.data;
 };

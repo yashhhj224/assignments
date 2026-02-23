@@ -55,12 +55,17 @@ export const registerUserService = async (payload: any) => {
 
   const hashedPassword = await hashPassword(password);
 
-  const user = await User.create({
+  const newUserData: any = {
     username,
     email,
-    password: hashedPassword,
-    profilePic
-  });
+    password: hashedPassword
+  };
+
+  if (profilePic && profilePic.trim() !== "") {
+    newUserData.profilePic = profilePic;
+  }
+
+  const user = await User.create(newUserData);
 
   const token = generateToken(user._id.toString());
 
@@ -72,7 +77,7 @@ export const registerUserService = async (payload: any) => {
       email: user.email,
       profilePic: user.profilePic,
       following: user.following,
-      followers: user.followers
+      followers: user.followers    
     }
   };
 };

@@ -1,0 +1,81 @@
+
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useAppSelector, useAppDispatch } from "../redux/hooks";
+import { loadUserFromStorage } from "../redux/slices/authSlice";
+
+import LoginPage from "../pages/LoginPage";
+import RegisterPage from "../pages/RegisterPage";
+import HomePage from "../pages/HomePage";
+import CreatePostPage from "../pages/CreatePostPage";
+import PostDetailPage from "../pages/PostDetailPage";
+import ProfilePage from "../pages/ProfilePage";
+import NotFoundPage from "../pages/NotFoundPage";
+import FeedLayout from "../components/layout/FeedLayout";
+import FollowersPage from "../pages/FollowersPage";
+import FollowingPage from "../pages/FollowingPage";
+import UsersPage from "../pages/UserPage";
+
+const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  const { token } = useAppSelector((state) => state.auth);
+  if (!token) return <Navigate to="/login" replace />;
+  return children;
+};
+
+const PublicRoute = ({ children }: { children: JSX.Element }) => {
+  const { token } = useAppSelector((state) => state.auth);
+  if (token) return <Navigate to="/home" replace />;
+  return children;
+};
+
+const App = () => {
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(loadUserFromStorage());
+  }, [dispatch]);
+
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/home" />} />
+
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        }
+      />
+
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <RegisterPage />
+          </PublicRoute>
+        }
+      />
+
+      <Route
+        element={
+          <ProtectedRoute>
+            <FeedLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/create-post" element={<CreatePostPage />} />
+        <Route path="/users" element={<UsersPage />} />
+        <Route path="/post/:id" element={<PostDetailPage />} />
+        <Route path="/profile/:userId" element={<ProfilePage />} />
+        <Route path="/profile/:userId/followers" element={<FollowersPage />} />
+        <Route path="/profile/:userId/following" element={<FollowingPage />} />
+      </Route>
+
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  );
+};
+
+export default App;

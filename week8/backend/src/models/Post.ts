@@ -8,6 +8,8 @@ export interface IPost extends Document {
   content: string;
   images: string[];
   tags: string[];
+  likesCount: number;
+  commentsCount: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -56,6 +58,14 @@ const postSchema = new Schema<IPost>(
     tags: {
       type: [String],
       default: []
+    },
+    likesCount: {
+      type: Number,
+      default: 0
+    },
+    commentsCount: {
+      type: Number,
+      default: 0
     }
   },
   { timestamps: true }

@@ -1,132 +1,112 @@
 
-import { useEffect, useState } from "react";
-import { useAuth } from "../../hooks/useAuth";
-import ErrorMessage from "../common/ErrorMessage";
-import {
-  isValidEmail,
-  normalizeEmail,
-  normalizeText
-} from "../../utils/validators";
+import styled from "styled-components";
+import { useState } from "react";
+import { useAppDispatch } from "../../redux/hooks";
+import { loginUser } from "../../redux/slices/authSlice";
+import { useNavigate } from "react-router-dom";
+import AuthTabs from "./AuthTabs";
 
-import {
-  AuthButton,
-  AuthForm,
-  AuthFormTitle,
-  AuthFormWrapper,
-  AuthInput,
-  AuthLabel
-} from "../../styles/components/authFormStyles";
+const Container = styled.div`
+  width: 380px;
+`;
 
-type LoginFormState = {
-  email: string;
-  password: string;
-  error: string | null;
-};
+const Heading = styled.h2`
+  font-size: 32px;
+  margin-bottom: 10px;
+`;
+
+const SubText = styled.p`
+  color: #64748b;
+  margin-bottom: 30px;
+`;
+
+const Label = styled.label`
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 20px;
+  outline: none;
+  transition: border 0.2s ease;
+
+  &:focus {
+    border-color: #4338ca;
+  }
+`;
+
+const Button = styled.button`
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  border: none;
+  background: #4338ca;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: #3730a3;
+  }
+`;
+
+const SwitchText = styled.p`
+  margin-top: 20px;
+  font-size: 14px;
+`;
+
+const SwitchLink = styled.span`
+  color: #4338ca;
+  cursor: pointer;
+  font-weight: 600;
+`;
 
 const LoginForm = () => {
-  const { loginUser, authError, clearAuthError, isAuthLoading } = useAuth();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
-  const [state, setState] = useState<LoginFormState>({
-    email: "",
-    password: "",
-    error: null
-  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleChange = (field: keyof LoginFormState, value: string) => {
-    setState((prev) => ({
-      ...prev,
-      [field]: value,
-      error: null
-    }));
+  const handleSubmit = async () => {
+    const result = await dispatch(loginUser({ email, password }));
+    if (loginUser.fulfilled.match(result)) {
+      navigate("/home");
+    }
   };
-
-  const validateForm = (): boolean => {
-    const email = normalizeEmail(state.email);
-    const password = normalizeText(state.password);
-
-    if (!email || !password) {
-      setState((prev) => ({
-        ...prev,
-        error: "Email and password are required"
-      }));
-      return false;
-    }
-
-    if (!isValidEmail(email)) {
-      setState((prev) => ({
-        ...prev,
-        error: "Invalid email format"
-      }));
-      return false;
-    }
-
-    if (password.length < 6) {
-      setState((prev) => ({
-        ...prev,
-        error: "Password must be at least 6 characters"
-      }));
-      return false;
-    }
-
-    return true;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    clearAuthError();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    await loginUser({
-      email: normalizeEmail(state.email),
-      password: normalizeText(state.password)
-    });
-  };
-
-  useEffect(() => {
-    if (authError) {
-      setState((prev) => ({
-        ...prev,
-        error: authError
-      }));
-    }
-  }, [authError]);
 
   return (
-    <AuthFormWrapper>
-      <AuthFormTitle>Login</AuthFormTitle>
+    <Container>
+      <AuthTabs />
 
-      <AuthForm onSubmit={handleSubmit}>
-        {state.error ? <ErrorMessage message={state.error} /> : null}
+      <Heading>Welcome Back</Heading>
+      <SubText>Enter your details to access your account</SubText>
 
-        <div>
-          <AuthLabel>Email</AuthLabel>
-          <AuthInput
-            type="email"
-            value={state.email}
-            placeholder="Enter your email"
-            onChange={(e) => handleChange("email", e.target.value)}
-          />
-        </div>
+      <Label>Email address</Label>
+      <Input value={email} onChange={(e) => setEmail(e.target.value)} />
 
-        <div>
-          <AuthLabel>Password</AuthLabel>
-          <AuthInput
-            type="password"
-            value={state.password}
-            placeholder="Enter your password"
-            onChange={(e) => handleChange("password", e.target.value)}
-          />
-        </div>
+      <Label>Password</Label>
+      <Input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
 
-        <AuthButton disabled={isAuthLoading} type="submit">
-          {isAuthLoading ? "Logging in..." : "Login"}
-        </AuthButton>
-      </AuthForm>
-    </AuthFormWrapper>
+      <Button onClick={handleSubmit}>Sign In</Button>
+
+      <SwitchText>
+        Don't have an account?{" "}
+        <SwitchLink onClick={() => navigate("/register")}>
+          Create an account
+        </SwitchLink>
+      </SwitchText>
+    </Container>
   );
 };
 

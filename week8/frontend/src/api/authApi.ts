@@ -1,41 +1,45 @@
 
-import { API_ROUTES } from "../constants/apiRoutes";
-import type {
-  AuthResponseData,
-  LoginRequestBody,
-  RegisterRequestBody
-} from "../types/auth";
-import { normalizeEmail, normalizeText } from "../utils/validators";
-import { sendRequest } from "./apiClient";
+const BASE_URL = "http://localhost:5000/api";
 
-export const registerUserApi = async (
-  payload: RegisterRequestBody
-): Promise<AuthResponseData> => {
-  const safePayload: RegisterRequestBody = {
-    username: normalizeText(payload.username),
-    email: normalizeEmail(payload.email),
-    password: normalizeText(payload.password),
-    profilePic: payload.profilePic ? normalizeText(payload.profilePic) : ""
-  };
-
-  return sendRequest<AuthResponseData, RegisterRequestBody>({
-    endpoint: API_ROUTES.AUTH.REGISTER,
+export const loginApi = async (payload: {
+  email: string;
+  password: string;
+}) => {
+  const response = await fetch(`${BASE_URL}/login`, {
     method: "POST",
-    body: safePayload
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
   });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Login failed");
+  }
+
+  return data.data;
 };
 
-export const loginUserApi = async (
-  payload: LoginRequestBody
-): Promise<AuthResponseData> => {
-  const safePayload: LoginRequestBody = {
-    email: normalizeEmail(payload.email),
-    password: normalizeText(payload.password)
-  };
-
-  return sendRequest<AuthResponseData, LoginRequestBody>({
-    endpoint: API_ROUTES.AUTH.LOGIN,
+export const registerApi = async (payload: {
+  username: string;
+  email: string;
+  password: string;
+}) => {
+  const response = await fetch(`${BASE_URL}/register`, {
     method: "POST",
-    body: safePayload
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
   });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Registration failed");
+  }
+
+  return data.data;
 };

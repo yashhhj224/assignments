@@ -5,28 +5,23 @@ import { HTTP_STATUS } from "../constants/httpStatus";
 import { isValidMongoId } from "../utils/validators";
 import { MESSAGES } from "../constants/messages";
 
-export const followUserService = async (currentUserId: string, targetUserId: string) => {
-  if (!isValidMongoId(targetUserId)) {
-    throw new ApiError(MESSAGES.ERROR.INVALID_USER_ID, HTTP_STATUS.BAD_REQUEST);
-  }
-
+export const followUserService = async (
+  currentUserId: string,
+  targetUserId: string
+) => {
   if (currentUserId === targetUserId) {
-    throw new ApiError(MESSAGES.ERROR.YOU_CANNOT_FOLLOW_YOURSELF, HTTP_STATUS.BAD_REQUEST);
+    throw new Error("You cannot follow yourself");
   }
 
   const currentUser = await User.findById(currentUserId);
   const targetUser = await User.findById(targetUserId);
 
   if (!currentUser || !targetUser) {
-    throw new ApiError(MESSAGES.ERROR.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    throw new Error("User not found");
   }
 
-  const alreadyFollowing = currentUser.following.some(
-    (id) => id.toString() === targetUserId
-  );
-
-  if (alreadyFollowing) {
-    throw new ApiError(MESSAGES.ERROR.ALREADY_FOLLOWING, HTTP_STATUS.BAD_REQUEST);
+  if (currentUser.following.includes(targetUser._id)) {
+    return;
   }
 
   currentUser.following.push(targetUser._id);
@@ -34,28 +29,17 @@ export const followUserService = async (currentUserId: string, targetUserId: str
 
   await currentUser.save();
   await targetUser.save();
-
-  return true;
 };
 
-export const unfollowUserService = async (currentUserId: string, targetUserId: string) => {
-  if (!isValidMongoId(targetUserId)) {
-    throw new ApiError(MESSAGES.ERROR.INVALID_USER_ID, HTTP_STATUS.BAD_REQUEST);
-  }
-
+export const unfollowUserService = async (
+  currentUserId: string,
+  targetUserId: string
+) => {
   const currentUser = await User.findById(currentUserId);
   const targetUser = await User.findById(targetUserId);
 
   if (!currentUser || !targetUser) {
-    throw new ApiError(MESSAGES.ERROR.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
-  }
-
-  const isFollowing = currentUser.following.some(
-    (id) => id.toString() === targetUserId
-  );
-
-  if (!isFollowing) {
-    throw new ApiError(MESSAGES.ERROR.NOT_FOLLOWING, HTTP_STATUS.BAD_REQUEST);
+    throw new Error("User not found");
   }
 
   currentUser.following = currentUser.following.filter(
@@ -68,8 +52,6 @@ export const unfollowUserService = async (currentUserId: string, targetUserId: s
 
   await currentUser.save();
   await targetUser.save();
-
-  return true;
 };
 
 export const getFollowingService = async (currentUserId: string) => {

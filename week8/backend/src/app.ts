@@ -2,14 +2,13 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
-import fs from "fs";
-
+import likeRoutes from "./routes/likeRoutes";
+import commentRoutes from "./routes/commentRoutes";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import followRoutes from "./routes/followRoutes";
 import postRoutes from "./routes/postRoutes";
 import uploadRoutes from "./routes/uploadRoutes";
-
 import { errorMiddleware } from "./middlewares/errorMiddleware";
 import { HTTP_STATUS } from "./constants/httpStatus";
 import { MESSAGES } from "./constants/messages";
@@ -34,6 +33,8 @@ app.use("/api", authRoutes);
 app.use("/api", userRoutes);
 app.use("/api", followRoutes);
 app.use("/api", postRoutes);
+app.use("/api", likeRoutes);
+app.use("/api", commentRoutes);
 app.use("/api", uploadRoutes);
 
 app.use((req, res) => {

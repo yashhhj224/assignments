@@ -10,7 +10,8 @@ export const MESSAGES = {
     PROFILE_UPDATE_SUCCESS: "Profile updated successfully",
     PROFILE_PIC_UPDATE_SUCCESS: "Profile picture updated successfully",
     USERS_FETCH_SUCCESS: "Users fetched successfully",
-    USER_FETCH_SUCCESS: "User fetched successfully"
+    USER_FETCH_SUCCESS: "User fetched successfully",
+    PASSWORD_UPDATE_SUCCESS: "Password updated successfully"
   },
 
   FOLLOW: {

@@ -7,12 +7,14 @@ import { successResponse } from "../utils/response";
 import {
   getAllUsersService,
   getProfileService,
-  getUserByIdService,
   updateProfileService,
   updateProfilePicService,
   searchUsersService,
   changePasswordService
 } from "../services/userService";
+import { ApiError } from "../utils/ApiError";
+import { User } from "../models/User";
+import { isValidMongoId } from "../utils/validators";
 
 export const getProfileController = asyncHandler(
   async (req: Request, res: Response) => {
@@ -76,12 +78,30 @@ export const getAllUsersController = asyncHandler(
 
 export const getUserByIdController = asyncHandler(
   async (req: Request, res: Response) => {
-    const user = await getUserByIdService(req.params.id);
+    const { userId } = req.params;
+
+    if (!userId || !isValidMongoId(userId)) {
+      throw new ApiError(
+        MESSAGES.ERROR.INVALID_USER_ID,
+        HTTP_STATUS.BAD_REQUEST
+      );
+    }
+
+    const user = await User.findById(userId)
+      .populate("followers", "-password")
+      .populate("following", "-password");
+
+    if (!user) {
+      throw new ApiError(
+        MESSAGES.ERROR.USER_NOT_FOUND,
+        HTTP_STATUS.NOT_FOUND
+      );
+    }
 
     return successResponse(
       res,
       HTTP_STATUS.OK,
-      MESSAGES.USER.USER_FETCH_SUCCESS,
+      MESSAGES.USER.PROFILE_FETCH_SUCCESS,
       user
     );
   }
@@ -94,7 +114,12 @@ export const searchUsersController = asyncHandler(
 
     const users = await searchUsersService(query, userId);
 
-    successResponse(res, HTTP_STATUS.OK, MESSAGES.USER.USERS_FETCH_SUCCESS, users);
+    return successResponse(
+      res,
+      HTTP_STATUS.OK,
+      MESSAGES.USER.USERS_FETCH_SUCCESS,
+      users
+    );
   }
 );
 
@@ -105,6 +130,10 @@ export const changePasswordController = asyncHandler(
 
     await changePasswordService(userId, currentPassword, newPassword);
 
-    successResponse(res, HTTP_STATUS.OK, "Password updated successfully");
+    return successResponse(
+      res,
+      HTTP_STATUS.OK,
+      MESSAGES.USER.PASSWORD_UPDATE_SUCCESS
+    );
   }
 );

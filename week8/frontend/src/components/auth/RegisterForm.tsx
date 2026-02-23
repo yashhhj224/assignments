@@ -1,169 +1,118 @@
 
-import { useEffect, useState } from "react";
-import { useAuth } from "../../hooks/useAuth";
-import ErrorMessage from "../common/ErrorMessage";
-import {
-  isValidEmail,
-  isValidPassword,
-  isValidUsername,
-  normalizeEmail,
-  normalizeText
-} from "../../utils/validators";
+import styled from "styled-components";
+import { useState } from "react";
+import { useAppDispatch } from "../../redux/hooks";
+import { registerUser } from "../../redux/slices/authSlice";
+import { useNavigate } from "react-router-dom";
+import AuthTabs from "./AuthTabs";
 
-import {
-  AuthButton,
-  AuthForm,
-  AuthFormTitle,
-  AuthFormWrapper,
-  AuthInput,
-  AuthLabel
-} from "../../styles/components/authFormStyles";
+const Container = styled.div`
+  width: 380px;
+`;
 
-type RegisterFormState = {
-  username: string;
-  email: string;
-  password: string;
-  profilePic: string;
-  error: string | null;
-};
+const Heading = styled.h2`
+  font-size: 32px;
+  margin-bottom: 10px;
+`;
+
+const SubText = styled.p`
+  color: #64748b;
+  margin-bottom: 30px;
+`;
+
+const Label = styled.label`
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 20px;
+  outline: none;
+  transition: border 0.2s ease;
+
+  &:focus {
+    border-color: #4338ca;
+  }
+`;
+
+const Button = styled.button`
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  border: none;
+  background: #4338ca;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: #3730a3;
+  }
+`;
+
+const SwitchText = styled.p`
+  margin-top: 20px;
+  font-size: 14px;
+`;
+
+const SwitchLink = styled.span`
+  color: #4338ca;
+  cursor: pointer;
+  font-weight: 600;
+`;
 
 const RegisterForm = () => {
-  const { registerUser, authError, clearAuthError, isAuthLoading } = useAuth();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
-  const [state, setState] = useState<RegisterFormState>({
-    username: "",
-    email: "",
-    password: "",
-    profilePic: "",
-    error: null
-  });
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleChange = (field: keyof RegisterFormState, value: string) => {
-    setState((prev) => ({
-      ...prev,
-      [field]: value,
-      error: null
-    }));
+  const handleSubmit = async () => {
+    const result = await dispatch(
+      registerUser({ username, email, password })
+    );
+    if (registerUser.fulfilled.match(result)) {
+      navigate("/login", { replace: true });
+    }
   };
-
-  const validateForm = (): boolean => {
-    const username = normalizeText(state.username);
-    const email = normalizeEmail(state.email);
-    const password = normalizeText(state.password);
-
-    if (!username || !email || !password) {
-      setState((prev) => ({
-        ...prev,
-        error: "Username, email and password are required"
-      }));
-      return false;
-    }
-
-    if (!isValidUsername(username)) {
-      setState((prev) => ({
-        ...prev,
-        error: "Username must be at least 3 characters"
-      }));
-      return false;
-    }
-
-    if (!isValidEmail(email)) {
-      setState((prev) => ({
-        ...prev,
-        error: "Invalid email format"
-      }));
-      return false;
-    }
-
-    if (!isValidPassword(password)) {
-      setState((prev) => ({
-        ...prev,
-        error: "Password must be at least 6 characters"
-      }));
-      return false;
-    }
-
-    return true;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    clearAuthError();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    await registerUser({
-      username: normalizeText(state.username),
-      email: normalizeEmail(state.email),
-      password: normalizeText(state.password),
-      profilePic: state.profilePic ? normalizeText(state.profilePic) : ""
-    });
-  };
-
-  useEffect(() => {
-    if (authError) {
-      setState((prev) => ({
-        ...prev,
-        error: authError
-      }));
-    }
-  }, [authError]);
 
   return (
-    <AuthFormWrapper>
-      <AuthFormTitle>Register</AuthFormTitle>
+    <Container>
+      <AuthTabs />
 
-      <AuthForm onSubmit={handleSubmit}>
-        {state.error ? <ErrorMessage message={state.error} /> : null}
+      <Heading>Create Account</Heading>
+      <SubText>Enter your details to create an account</SubText>
 
-        <div>
-          <AuthLabel>Username</AuthLabel>
-          <AuthInput
-            type="text"
-            value={state.username}
-            placeholder="Enter username"
-            onChange={(e) => handleChange("username", e.target.value)}
-          />
-        </div>
+      <Label>Username</Label>
+      <Input value={username} onChange={(e) => setUsername(e.target.value)} />
 
-        <div>
-          <AuthLabel>Email</AuthLabel>
-          <AuthInput
-            type="email"
-            value={state.email}
-            placeholder="Enter email"
-            onChange={(e) => handleChange("email", e.target.value)}
-          />
-        </div>
+      <Label>Email address</Label>
+      <Input value={email} onChange={(e) => setEmail(e.target.value)} />
 
-        <div>
-          <AuthLabel>Password</AuthLabel>
-          <AuthInput
-            type="password"
-            value={state.password}
-            placeholder="Enter password"
-            onChange={(e) => handleChange("password", e.target.value)}
-          />
-        </div>
+      <Label>Password</Label>
+      <Input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
 
-        <div>
-          <AuthLabel>Profile Picture URL (Optional)</AuthLabel>
-          <AuthInput
-            type="text"
-            value={state.profilePic}
-            placeholder="Paste image url"
-            onChange={(e) => handleChange("profilePic", e.target.value)}
-          />
-        </div>
+      <Button onClick={handleSubmit}>Create Account</Button>
 
-        <AuthButton disabled={isAuthLoading} type="submit">
-          {isAuthLoading ? "Creating account..." : "Register"}
-        </AuthButton>
-      </AuthForm>
-    </AuthFormWrapper>
+      <SwitchText>
+        Already have an account?{" "}
+        <SwitchLink onClick={() => navigate("/login")}>
+          Login
+        </SwitchLink>
+      </SwitchText>
+    </Container>
   );
 };
 

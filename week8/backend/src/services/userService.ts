@@ -145,19 +145,14 @@ export const getUserByIdService = async (userId: string) => {
   return user;
 };
 
-export const searchUsersService = async (query: string, currentUserId: string) => {
-  if (!query || typeof query !== "string") {
-    return [];
-  }
-
-  const regex = new RegExp(query, "i"); // case-insensitive
-
-  const users = await User.find({
-    _id: { $ne: currentUserId },
-    username: { $regex: regex }
+export const searchUsersService = async (
+  query: string,
+  currentUserId: string
+) => {
+  return User.find({
+    username: { $regex: query, $options: "i" },
+    _id: { $ne: currentUserId }
   }).select("-password");
-
-  return users;
 };
 
 export const changePasswordService = async (

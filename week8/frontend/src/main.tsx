@@ -3,10 +3,11 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ThemeProvider } from "styled-components";
 import { Provider } from "react-redux";
-import App from "./App";
+import { BrowserRouter } from "react-router-dom";
+import App from "./app/App";
 import { GlobalStyle } from "./styles/GlobalStyles";
 import { theme } from "./styles/theme";
-import { store } from "./redux/store";
+import { store } from "./app/store";
 
 const container = document.getElementById("root");
 
@@ -18,8 +19,10 @@ createRoot(container).render(
   <StrictMode>
     <Provider store={store}>
       <ThemeProvider theme={theme}>
-        <GlobalStyle />
-        <App />
+        <BrowserRouter>
+          <GlobalStyle />
+          <App />
+        </BrowserRouter>
       </ThemeProvider>
     </Provider>
   </StrictMode>

@@ -1,119 +1,201 @@
 
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { APP_CONSTANTS } from "../../constants/appConstants";
-import type { CreatePostRequestBody, Post, UpdatePostRequestBody } from "../../types/post";
-import { parseApiErrorMessage } from "../../utils/errorParser";
-import { createPostApi, deletePostApi, getFeedApi, getPostByIdApi, getPostsByUserApi, updatePostApi } from "../../api/postApi";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import {
+  fetchFeedApi,
+  fetchPostByIdApi,
+  fetchPostsByUserApi,
+  toggleLikeApi
+} from "../../api/postApi";
 
 type PostsState = {
-  feedPosts: Post[];
-  userPosts: Post[];
-  selectedPost: Post | null;
-
-  feedPage: number;
-  hasMoreFeed: boolean;
-
-  userPostsPage: number;
-  hasMoreUserPosts: boolean;
-
+  posts: any[];
+  selectedPost: any | null;
+  userPosts: any[];
+  comments: Record<string, any[]>;
   isLoading: boolean;
   error: string | null;
 };
 
 const initialState: PostsState = {
-  feedPosts: [],
-  userPosts: [],
+  posts: [],
   selectedPost: null,
-
-  feedPage: APP_CONSTANTS.DEFAULT_FEED_PAGE,
-  hasMoreFeed: true,
-
-  userPostsPage: APP_CONSTANTS.DEFAULT_FEED_PAGE,
-  hasMoreUserPosts: true,
-
+  userPosts: [],
+  comments: {},
   isLoading: false,
   error: null
 };
 
-export const fetchFeedPosts = createAsyncThunk<
-  { posts: Post[]; page: number; hasMore: boolean },
-  number,
-  { rejectValue: string }
->("posts/fetchFeedPosts", async (page, thunkApi) => {
-  try {
-    const posts = await getFeedApi(page, APP_CONSTANTS.DEFAULT_FEED_LIMIT);
-
-    return {
-      posts,
-      page: page + 1,
-      hasMore: posts.length === APP_CONSTANTS.DEFAULT_FEED_LIMIT
-    };
-  } catch (error) {
-    return thunkApi.rejectWithValue(parseApiErrorMessage(error));
-  }
-});
-
-export const fetchUserPosts = createAsyncThunk<
-  { posts: Post[]; page: number; hasMore: boolean; userId: string },
-  { userId: string; page: number },
-  { rejectValue: string }
->("posts/fetchUserPosts", async ({ userId, page }, thunkApi) => {
-  try {
-    const posts = await getPostsByUserApi(userId, page, APP_CONSTANTS.DEFAULT_FEED_LIMIT);
-
-    return {
-      posts,
-      page: page + 1,
-      hasMore: posts.length === APP_CONSTANTS.DEFAULT_FEED_LIMIT,
-      userId
-    };
-  } catch (error) {
-    return thunkApi.rejectWithValue(parseApiErrorMessage(error));
-  }
-});
-
-export const fetchPostById = createAsyncThunk<Post, string, { rejectValue: string }>(
-  "posts/fetchPostById",
-  async (postId, thunkApi) => {
-    try {
-      return await getPostByIdApi(postId);
-    } catch (error) {
-      return thunkApi.rejectWithValue(parseApiErrorMessage(error));
-    }
+export const fetchFeedPosts = createAsyncThunk(
+  "posts/fetchFeed",
+  async ({ page }: { page: number }) => {
+    return await fetchFeedApi(page);
   }
 );
 
-export const createPost = createAsyncThunk<Post, CreatePostRequestBody, { rejectValue: string }>(
-  "posts/createPost",
-  async (payload, thunkApi) => {
-    try {
-      return await createPostApi(payload);
-    } catch (error) {
-      return thunkApi.rejectWithValue(parseApiErrorMessage(error));
-    }
+export const fetchPostById = createAsyncThunk(
+  "posts/fetchById",
+  async (postId: string) => {
+    return await fetchPostByIdApi(postId);
   }
 );
 
-export const updatePost = createAsyncThunk<
-  Post,
-  { postId: string; payload: UpdatePostRequestBody },
-  { rejectValue: string }
->("posts/updatePost", async ({ postId, payload }, thunkApi) => {
-  try {
-    return await updatePostApi(postId, payload);
-  } catch (error) {
-    return thunkApi.rejectWithValue(parseApiErrorMessage(error));
-  }
-});
+export const createPost = createAsyncThunk(
+  "posts/create",
+  async (body: {
+    title: string;
+    content: string;
+    tags: string[];
+    images: string[];
+  }) => {
+    const token = localStorage.getItem("token");
 
-export const deletePost = createAsyncThunk<void, string, { rejectValue: string }>(
-  "posts/deletePost",
-  async (postId, thunkApi) => {
-    try {
-      await deletePostApi(postId);
-    } catch (error) {
-      return thunkApi.rejectWithValue(parseApiErrorMessage(error));
+    const res = await fetch("http://localhost:5000/api/posts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message);
+
+    return data.data;
+  }
+);
+
+export const updatePost = createAsyncThunk(
+  "posts/update",
+  async (body: {
+    postId: string;
+    title: string;
+    content: string;
+    tags: string[];
+    images: string[];
+  }) => {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(
+      `http://localhost:5000/api/posts/${body.postId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message);
+
+    return data.data;
+  }
+);
+
+export const fetchPostsByUser = createAsyncThunk(
+  "posts/fetchByUser",
+  async (userId: string) => {
+    return await fetchPostsByUserApi(userId);
+  }
+);
+
+export const deletePost = createAsyncThunk(
+  "posts/delete",
+  async (postId: string) => {
+    const token = localStorage.getItem("token");
+
+    await fetch(
+      `http://localhost:5000/api/posts/${postId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    return postId;
+  }
+);
+
+export const toggleLike = createAsyncThunk(
+  "posts/toggleLike",
+  async (postId: string) => {
+    const data = await toggleLikeApi(postId);
+    return { postId, liked: data.liked };
+  }
+);
+
+export const fetchComments = createAsyncThunk(
+  "posts/fetchComments",
+  async (postId: string) => {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(
+      `http://localhost:5000/api/posts/${postId}/comments`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    const data = await res.json();
+    return { postId, comments: data.data };
+  }
+);
+
+export const addComment = createAsyncThunk(
+  "posts/addComment",
+  async ({ postId, content }: { postId: string; content: string }) => {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(
+      `http://localhost:5000/api/posts/${postId}/comments`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ content })
+      }
+    );
+
+    const data = await res.json();
+    return { postId, comment: data.data };
+  }
+);
+
+export const uploadImages = createAsyncThunk(
+  "posts/uploadImages",
+  async (files: FileList) => {
+    const token = localStorage.getItem("token");
+
+    const formData = new FormData();
+
+    for (let i = 0; i < files.length; i++) {
+      formData.append("images", files[i]);
     }
+
+    const res = await fetch(
+      "http://localhost:5000/api/uploads",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: formData
+      }
+    );
+
+    const data = await res.json();
+    return data.data.images;
   }
 );
 
@@ -121,102 +203,107 @@ const postsSlice = createSlice({
   name: "posts",
   initialState,
   reducers: {
-    clearPostsError: (state) => {
-      state.error = null;
-    },
-    resetPostsState: () => {
-      return initialState;
+    incrementCommentsCount(state) {
+      if (state.selectedPost) {
+        state.selectedPost.commentsCount += 1;
+      }
     }
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchFeedPosts.pending, (state) => {
         state.isLoading = true;
-        state.error = null;
       })
       .addCase(fetchFeedPosts.fulfilled, (state, action) => {
-       state.feedPosts = [...state.feedPosts, ...action.payload.posts];
-        state.feedPage = action.payload.page;
-        state.hasMoreFeed = action.payload.hasMore;
         state.isLoading = false;
-        state.error = null;
-      })
-      .addCase(fetchFeedPosts.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload || "Something went wrong";
-      })
-
-      .addCase(fetchUserPosts.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(fetchUserPosts.fulfilled, (state, action) => {
-        state.userPosts = [...state.userPosts, ...action.payload.posts];
-        state.userPostsPage = action.payload.page;
-        state.hasMoreUserPosts = action.payload.hasMore;
-        state.isLoading = false;
-        state.error = null;
-      })
-      .addCase(fetchUserPosts.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload || "Something went wrong";
-      })
-
-      .addCase(fetchPostById.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
+        state.posts = action.payload.posts || action.payload;
       })
       .addCase(fetchPostById.fulfilled, (state, action) => {
         state.selectedPost = action.payload;
-        state.isLoading = false;
-        state.error = null;
       })
-      .addCase(fetchPostById.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload || "Something went wrong";
+      .addCase(createPost.fulfilled, (state, action) => {
+        if (action.payload) {
+          state.posts.unshift(action.payload);
+        }
       })
+      .addCase(fetchPostsByUser.fulfilled, (state, action) => {
+        state.userPosts = action.payload;
+      })
+      .addCase(toggleLike.fulfilled, (state, action) => {
+        const { postId, liked } = action.payload;
 
-      .addCase(createPost.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(createPost.fulfilled, (state) => {
-        state.isLoading = false;
-        state.error = null;
-      })
-      .addCase(createPost.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload || "Something went wrong";
-      })
+        const updatePostLike = (post: any) => {
+          post.isLikedByCurrentUser = liked;
+          post.likesCount += liked ? 1 : -1;
+        };
 
-      .addCase(updatePost.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(updatePost.fulfilled, (state) => {
-        state.isLoading = false;
-        state.error = null;
-      })
-      .addCase(updatePost.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload || "Something went wrong";
-      })
+        const post = state.posts.find(p => p._id === postId);
+        if (post) {
+          updatePostLike(post);
+        }
 
-      .addCase(deletePost.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
+        if (state.selectedPost?._id === postId) {
+          updatePostLike(state.selectedPost);
+        }
+
+        const userPost = state.userPosts.find(p => p._id === postId);
+        if (userPost) {
+          updatePostLike(userPost);
+        }
       })
-      .addCase(deletePost.fulfilled, (state) => {
-        state.isLoading = false;
-        state.error = null;
+      .addCase(fetchComments.fulfilled, (state, action) => {
+        state.comments[action.payload.postId] = action.payload.comments;
       })
-      .addCase(deletePost.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload || "Something went wrong";
+      .addCase(addComment.fulfilled, (state, action) => {
+        const { postId, comment } = action.payload;
+
+        if (!state.comments[postId]) {
+          state.comments[postId] = [];
+        }
+
+        state.comments[postId].push(comment);
+
+        if (state.selectedPost?._id === postId) {
+          state.selectedPost.commentsCount += 1;
+        }
+      })
+      .addCase(updatePost.fulfilled, (state, action) => {
+        const previousLiked =
+          state.selectedPost?.isLikedByCurrentUser;
+
+        const previousLikesCount =
+          state.selectedPost?.likesCount;
+
+        state.selectedPost = {
+          ...action.payload,
+          isLikedByCurrentUser: previousLiked,
+          likesCount: previousLikesCount
+        };
+
+        const index = state.posts.findIndex(
+          (p) => p._id === action.payload._id
+        );
+
+        if (index !== -1) {
+          state.posts[index] = {
+            ...state.posts[index],
+            ...action.payload,
+            isLikedByCurrentUser: previousLiked,
+            likesCount: previousLikesCount
+          };
+        }
+      })
+      .addCase(deletePost.fulfilled, (state, action) => {
+        state.posts = state.posts.filter(
+          (p) => p._id !== action.payload
+        );
+
+        if (state.selectedPost?._id === action.payload) {
+          state.selectedPost = null;
+        }
       });
   }
 });
 
-export const { clearPostsError, resetPostsState } = postsSlice.actions;
-
+export const { incrementCommentsCount } = postsSlice.actions;
 export default postsSlice.reducer;
