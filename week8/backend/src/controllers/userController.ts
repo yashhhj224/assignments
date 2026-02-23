@@ -10,10 +10,10 @@ import {
   updateProfileService,
   updateProfilePicService,
   searchUsersService,
-  changePasswordService
+  changePasswordService,
+  getUserByIdService
 } from "../services/userService";
 import { ApiError } from "../utils/ApiError";
-import { User } from "../models/User";
 import { isValidMongoId } from "../utils/validators";
 
 export const getProfileController = asyncHandler(
@@ -87,16 +87,7 @@ export const getUserByIdController = asyncHandler(
       );
     }
 
-    const user = await User.findById(userId)
-      .populate("followers", "-password")
-      .populate("following", "-password");
-
-    if (!user) {
-      throw new ApiError(
-        MESSAGES.ERROR.USER_NOT_FOUND,
-        HTTP_STATUS.NOT_FOUND
-      );
-    }
+    const user = await getUserByIdService(userId);
 
     return successResponse(
       res,

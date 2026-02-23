@@ -43,3 +43,29 @@ export const registerApi = async (payload: {
 
   return data.data;
 };
+
+export const updateProfileApi = async (
+  formData: FormData
+) => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    throw new Error("Unauthorized");
+  }
+
+  const response = await fetch(`${BASE_URL}/profile`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    body: formData
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Profile update failed");
+  }
+
+  return data; 
+};

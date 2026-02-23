@@ -1,9 +1,9 @@
 
 import styled from "styled-components";
 import { useState } from "react";
-import { useAppSelector, useAppDispatch } from "../../redux/hooks";
-import { followUser, unfollowUser } from "../../redux/slices/followSlice";
+import { useAppSelector } from "../../redux/hooks";
 import UserLink from "../common/UserLink";
+import FollowButton from "../common/FollowButton";
 
 const Wrapper = styled.div`
   background: white;
@@ -32,25 +32,12 @@ const UserRow = styled.div`
   border-bottom: 1px solid #f1f5f9;
 `;
 
-const FollowBtn = styled.button<{ $following?: boolean }>`
-  padding: 6px 14px;
-  border-radius: 20px;
-  border: none;
-  cursor: pointer;
-  background: ${({ $following }) =>
-    $following ? "#e5e7eb" : "#4338ca"};
-  color: ${({ $following }) =>
-    $following ? "#374151" : "white"};
-`;
-
 type Props = {
   type: "followers" | "following" | "all";
   users?: any[];
 };
 
 const FollowersFollowingList = ({ type, users }: Props) => {
-  const dispatch = useAppDispatch();
-
   const selectedUser = useAppSelector(
     (state) => state.users.selectedUser
   );
@@ -104,38 +91,12 @@ const FollowersFollowingList = ({ type, users }: Props) => {
         />
       </TopBar>
 
-      {filtered.map((user: any) => {
-        const isFollowing =
-          currentUser?.following?.some(
-            (f: any) =>
-              (typeof f === "string"
-                ? f
-                : f._id) === user._id
-          );
-
-        return (
-          <UserRow key={user._id}>
-            <UserLink user={user} />
-
-            <FollowBtn
-              $following={isFollowing}
-              onClick={() =>
-                isFollowing
-                  ? dispatch(
-                      unfollowUser(user._id)
-                    )
-                  : dispatch(
-                      followUser(user._id)
-                    )
-              }
-            >
-              {isFollowing
-                ? "Unfollow"
-                : "Follow"}
-            </FollowBtn>
-          </UserRow>
-        );
-      })}
+      {filtered.map((user: any) => (
+        <UserRow key={user._id}>
+          <UserLink user={user} />
+          <FollowButton userId={user._id} />
+        </UserRow>
+      ))}
     </Wrapper>
   );
 };

@@ -16,7 +16,7 @@ const Wrapper = styled.div`
 
 const Header = styled.div`
   display: flex;
-  justify-content: space-between;   /* 🔥 important */
+  justify-content: space-between;  
   align-items: center;
   margin-bottom: 30px;
 `;
@@ -39,7 +39,7 @@ const UserRow = styled.div`
 `;
 
 const FollowingPage = () => {
-  const { userId } = useParams<{ userId: string }>();   // ✅ correct param
+  const { userId } = useParams<{ userId: string }>();  
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 

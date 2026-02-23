@@ -39,27 +39,22 @@ const App = () => {
     <Routes>
       <Route path="/" element={<Navigate to="/home" />} />
 
-      <Route
-        path="/login"
-        element={
+      <Route path="/login" element={
           <PublicRoute>
             <LoginPage />
           </PublicRoute>
         }
       />
 
-      <Route
-        path="/register"
-        element={
+      <Route path="/register" element={
           <PublicRoute>
             <RegisterPage />
           </PublicRoute>
         }
       />
 
-      <Route
-        element={
-          <ProtectedRoute>
+      <Route element={
+        <ProtectedRoute>
             <FeedLayout />
           </ProtectedRoute>
         }

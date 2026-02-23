@@ -24,6 +24,13 @@ export const followUserService = async (
     return;
   }
 
+  if (currentUserId === targetUserId) {
+    throw new ApiError(
+      "You cannot follow yourself",
+      HTTP_STATUS.BAD_REQUEST
+    );
+  }
+  
   currentUser.following.push(targetUser._id);
   targetUser.followers.push(currentUser._id);
 

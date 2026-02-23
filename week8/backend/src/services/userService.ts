@@ -13,13 +13,22 @@ import { comparePassword, hashPassword } from "../utils/hash";
 import { VALIDATION_RULES } from "../constants/validation";
 
 export const getProfileService = async (userId: string) => {
-  const user = await User.findById(userId).select("-password");
+  const user = await User.findById(userId)
+    .select("-password")
+    .populate("followers", "-password")
+    .populate("following", "-password");
 
   if (!user) {
-    throw new ApiError(MESSAGES.ERROR.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    throw new ApiError("User not found", 404);
   }
 
-  return user;
+  const userObj = user.toObject();
+
+  return {
+    ...userObj,
+    followersCount: userObj.followers?.length || 0,
+    followingCount: userObj.following?.length || 0
+  };
 };
 
 export const updateProfileService = async (
@@ -133,16 +142,31 @@ export const getAllUsersService = async (currentUserId: string) => {
 
 export const getUserByIdService = async (userId: string) => {
   if (!isValidMongoId(userId)) {
-    throw new ApiError(MESSAGES.ERROR.INVALID_USER_ID, HTTP_STATUS.BAD_REQUEST);
+    throw new ApiError(
+      MESSAGES.ERROR.INVALID_USER_ID,
+      HTTP_STATUS.BAD_REQUEST
+    );
   }
 
-  const user = await User.findById(userId).select("-password");
+  const user = await User.findById(userId)
+    .select("-password")
+    .populate("followers", "-password")
+    .populate("following", "-password");
 
   if (!user) {
-    throw new ApiError(MESSAGES.ERROR.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    throw new ApiError(
+      MESSAGES.ERROR.USER_NOT_FOUND,
+      HTTP_STATUS.NOT_FOUND
+    );
   }
 
-  return user;
+  const userObj = user.toObject();
+
+  return {
+    ...userObj,
+    followersCount: userObj.followers?.length || 0,
+    followingCount: userObj.following?.length || 0
+  };
 };
 
 export const searchUsersService = async (

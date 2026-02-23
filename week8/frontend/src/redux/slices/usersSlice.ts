@@ -1,5 +1,7 @@
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { followUser, unfollowUser } from "./followSlice";
+import { updateProfile } from "./authSlice";
 
 type UsersState = {
   selectedUser: any | null;
@@ -88,7 +90,59 @@ const usersSlice = createSlice({
       })
       .addCase(searchUsers.fulfilled, (state, action) => {
         state.searchResults = action.payload;
-      });
+      })
+
+      .addCase(followUser.fulfilled, (state, action) => {
+        const targetUserId = action.payload;
+
+        const updateFollowers = (user: any) => {
+          if (user._id === targetUserId) {
+            user.followersCount =
+              (user.followersCount || 0) + 1;
+          }
+        };
+
+        state.users.forEach(updateFollowers);
+        state.searchResults.forEach(updateFollowers);
+
+        if (state.selectedUser?._id === targetUserId) {
+          state.selectedUser.followersCount =
+            (state.selectedUser.followersCount || 0) + 1;
+        }
+      })
+
+      .addCase(unfollowUser.fulfilled, (state, action) => {
+        const targetUserId = action.payload;
+
+        const updateFollowers = (user: any) => {
+          if (user._id === targetUserId) {
+            user.followersCount =
+              Math.max((user.followersCount || 1) - 1, 0);
+          }
+        };
+
+        state.users.forEach(updateFollowers);
+        state.searchResults.forEach(updateFollowers);
+
+        if (state.selectedUser?._id === targetUserId) {
+          state.selectedUser.followersCount =
+            Math.max(
+              (state.selectedUser.followersCount || 1) - 1,
+              0
+            );
+        }
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        const updatedUser = action.payload.data;
+
+        if (state.selectedUser?._id === updatedUser._id) {
+          state.selectedUser = updatedUser;
+        }
+
+        state.users = state.users.map((user: any) =>
+          user._id === updatedUser._id ? updatedUser : user
+        );
+      })
   }
 });
 

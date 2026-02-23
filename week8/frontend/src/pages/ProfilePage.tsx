@@ -33,6 +33,12 @@ const ProfilePage = () => {
     (state) => state.users.selectedUser
   );
 
+  const currentUser = useAppSelector(
+    (state) => state.auth.user
+  );
+
+  const isOwnProfile = currentUser?._id === userId;
+
   const userPosts = useAppSelector(
     (state) => state.posts.userPosts
   );
@@ -49,12 +55,13 @@ const ProfilePage = () => {
   return (
     <Wrapper>
       <Container>
-        {/* Profile Header */}
         {selectedUser && (
-          <ProfileHeader user={selectedUser} />
+          <ProfileHeader 
+            user={selectedUser} 
+            isOwnProfile={isOwnProfile}
+          />
         )}
 
-        {/* User Posts */}
         {userPosts && userPosts.length > 0 ? (
           userPosts.map((post: any) => (
             <PostCard key={post._id} post={post} />

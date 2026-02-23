@@ -103,7 +103,6 @@ const CommentSection = ({ postId, autoFocus }: Props) => {
     dispatch(fetchComments(postId));
   }, [dispatch, postId]);
 
-  // 🔥 Focus + scroll when coming from comment icon
   useEffect(() => {
     if (autoFocus && inputRef.current) {
       inputRef.current.focus();

@@ -39,7 +39,7 @@ const UserRow = styled.div`
 `;
 
 const FollowersPage = () => {
-  const { userId } = useParams<{ userId: string }>();   // ✅ fixed
+  const { userId } = useParams<{ userId: string }>();  
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
