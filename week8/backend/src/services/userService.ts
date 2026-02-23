@@ -33,17 +33,31 @@ export const getProfileService = async (userId: string) => {
 
 export const updateProfileService = async (
   userId: string,
-  payload: any
+  payload: any,
+  file?: Express.Multer.File
 ) => {
-  if (!payload) {
-    throw new ApiError(MESSAGES.ERROR.REQUEST_BODY_REQUIRED, HTTP_STATUS.BAD_REQUEST);
+  if (!payload && !file) {
+    throw new ApiError(
+      MESSAGES.ERROR.REQUEST_BODY_REQUIRED,
+      HTTP_STATUS.BAD_REQUEST
+    );
   }
 
-  const updates: Record<string, string> = {};
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new ApiError(
+      MESSAGES.ERROR.USER_NOT_FOUND,
+      HTTP_STATUS.NOT_FOUND
+    );
+  }
 
   if (payload.username !== undefined) {
     if (!isNonEmptyString(payload.username)) {
-      throw new ApiError(MESSAGES.ERROR.USERNAME_CANNOT_BE_EMPTY, HTTP_STATUS.BAD_REQUEST);
+      throw new ApiError(
+        MESSAGES.ERROR.USERNAME_CANNOT_BE_EMPTY,
+        HTTP_STATUS.BAD_REQUEST
+      );
     }
 
     const normalizedUsername = normalizeText(payload.username);
@@ -54,15 +68,21 @@ export const updateProfileService = async (
     });
 
     if (existingUser) {
-      throw new ApiError("Username already taken", HTTP_STATUS.BAD_REQUEST);
+      throw new ApiError(
+        "Username already taken",
+        HTTP_STATUS.BAD_REQUEST
+      );
     }
 
-    updates.username = normalizedUsername;
+    user.username = normalizedUsername;
   }
 
   if (payload.email !== undefined) {
     if (!isNonEmptyString(payload.email)) {
-      throw new ApiError(MESSAGES.ERROR.EMAIL_REQUIRED, HTTP_STATUS.BAD_REQUEST);
+      throw new ApiError(
+        MESSAGES.ERROR.EMAIL_REQUIRED,
+        HTTP_STATUS.BAD_REQUEST
+      );
     }
 
     const normalizedEmail = normalizeEmail(payload.email);
@@ -73,67 +93,40 @@ export const updateProfileService = async (
     });
 
     if (existingEmail) {
-      throw new ApiError("Email already in use", HTTP_STATUS.BAD_REQUEST);
+      throw new ApiError(
+        "Email already in use",
+        HTTP_STATUS.BAD_REQUEST
+      );
     }
 
-    updates.email = normalizedEmail;
+    user.email = normalizedEmail;
   }
 
-  const updatedUser = await User.findByIdAndUpdate(
-    userId,
-    updates,
-    { returnDocument: "after" }
-  ).select("-password");
+  if (file) {
+    user.profilePic = file.path;
+  }
+
+  await user.save();
+
+  const updatedUser = await User.findById(userId)
+    .select("-password")
+    .populate("followers", "-password")
+    .populate("following", "-password");
 
   if (!updatedUser) {
-    throw new ApiError(MESSAGES.ERROR.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
-  }
-
-  return updatedUser;
-};
-
-export const updateProfilePicService = async (userId: string, payload: any) => {
-  if (!payload) {
     throw new ApiError(
-      MESSAGES.ERROR.REQUEST_BODY_REQUIRED,
-      HTTP_STATUS.BAD_REQUEST
+      MESSAGES.ERROR.USER_NOT_FOUND,
+      HTTP_STATUS.NOT_FOUND
     );
   }
 
-  if (!payload.profilePic) {
-    throw new ApiError(
-      MESSAGES.ERROR.PROFILE_PIC_REQUIRED,
-      HTTP_STATUS.BAD_REQUEST
-    );
-  }
+  const userObj = updatedUser.toObject();
 
-  const profilePic = normalizeText(payload.profilePic);
-
-  if (profilePic.startsWith("data:image/")) {
-    throw new ApiError(
-      MESSAGES.ERROR.BASE64_NOT_ALLOWED,
-      HTTP_STATUS.BAD_REQUEST
-    );
-  }
-
-  if (!profilePic.startsWith("/uploads/")) {
-    throw new ApiError(
-      MESSAGES.ERROR.INVALID_PROFILE_PIC_URL,
-      HTTP_STATUS.BAD_REQUEST
-    );
-  }
-
-  const updatedUser = await User.findByIdAndUpdate(
-    userId,
-    { profilePic },
-    { returnDocument: "after" }
-  ).select("-password");
-
-  if (!updatedUser) {
-    throw new ApiError(MESSAGES.ERROR.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
-  }
-
-  return updatedUser;
+  return {
+    ...userObj,
+    followersCount: userObj.followers?.length || 0,
+    followingCount: userObj.following?.length || 0
+  };
 };
 
 export const getAllUsersService = async (currentUserId: string) => {

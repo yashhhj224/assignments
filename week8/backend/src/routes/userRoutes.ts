@@ -6,17 +6,14 @@ import {
   getProfileController,
   getUserByIdController,
   updateProfileController,
-  updateProfilePicController,
-  changePasswordController
+  changePasswordController,
+  searchUsersController
 } from "../controllers/userController";
-import { searchUsersController } from "../controllers/userController";
 
 const router = Router();
 
 router.get("/profile", authMiddleware, getProfileController);
 router.put("/profile", authMiddleware, updateProfileController);
-
-router.put("/profile/picture", authMiddleware, updateProfilePicController);
 
 router.get("/users", authMiddleware, getAllUsersController);
 

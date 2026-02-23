@@ -8,7 +8,6 @@ import {
   getAllUsersService,
   getProfileService,
   updateProfileService,
-  updateProfilePicService,
   searchUsersService,
   changePasswordService,
   getUserByIdService
@@ -41,21 +40,6 @@ export const updateProfileController = asyncHandler(
       res,
       HTTP_STATUS.OK,
       MESSAGES.USER.PROFILE_UPDATE_SUCCESS,
-      updatedUser
-    );
-  }
-);
-
-export const updateProfilePicController = asyncHandler(
-  async (req: Request, res: Response) => {
-    const userId = req.userId as string;
-
-    const updatedUser = await updateProfilePicService(userId, req.body);
-
-    return successResponse(
-      res,
-      HTTP_STATUS.OK,
-      MESSAGES.USER.PROFILE_PIC_UPDATE_SUCCESS,
       updatedUser
     );
   }
