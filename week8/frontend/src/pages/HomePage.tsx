@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { fetchFeedPosts } from "../redux/slices/postsSlice";
 import PostCard from "../components/posts/PostCard";
 import Loader from "../components/ui/Loader";
+import FeedContainer from "../components/layout/FeedContainer";
 
 const HomePage = () => {
   const dispatch = useAppDispatch();
@@ -20,14 +21,14 @@ const HomePage = () => {
   }, [dispatch]);
 
   return (
-    <>
+    <FeedContainer>
       {isLoading && <Loader />}
       {posts
         .filter((post) => post && post._id)
         .map((post) => (
           <PostCard key={post._id} post={post} />
-      ))}
-    </>
+        ))}
+    </FeedContainer>
   );
 };
 

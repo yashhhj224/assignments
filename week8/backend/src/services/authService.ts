@@ -105,13 +105,13 @@ export const loginUserService = async (payload: any) => {
   const user = await User.findOne({ email });
 
   if (!user) {
-    throw new ApiError(MESSAGES.ERROR.USER_NOT_REGISTERED, HTTP_STATUS.NOT_FOUND);
+    throw new ApiError(MESSAGES.ERROR.USER_NOT_REGISTERED, HTTP_STATUS.UNAUTHORIZED);
   }
 
   const isMatch = await comparePassword(password, user.password);
 
   if (!isMatch) {
-    throw new ApiError(MESSAGES.ERROR.INCORRECT_PASSWORD, HTTP_STATUS.BAD_REQUEST);
+    throw new ApiError(MESSAGES.ERROR.INCORRECT_PASSWORD, HTTP_STATUS.UNAUTHORIZED);
   }
 
   const token = generateToken(user._id.toString());

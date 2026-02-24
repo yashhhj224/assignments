@@ -140,6 +140,11 @@ const CommentSection = ({ postId, autoFocus }: Props) => {
 
       {comments
         ?.filter((c: any) => c && c._id)
+        .sort(
+          (a: any, b: any) =>
+            new Date(b.createdAt).getTime() -
+            new Date(a.createdAt).getTime()
+        )
         .map((comment: any) => {
           const isOwner =
             user &&

@@ -10,16 +10,15 @@ import { FaHeart, FaRegComment } from "react-icons/fa";
 
 const Card = styled.div`
   background: white;
-  padding: 24px;
-  border-radius: 16px;
-  margin-bottom: 24px;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
-  transition: 0.2s ease;
+  padding: 28px 32px;
+  border-radius: 20px;
+  margin-bottom: 28px;
+  transition: all 0.2s ease;
+  border: 1px solid #f1f1f1;
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.06);
+    transform: translateY(-2px);
   }
 `;
 
@@ -27,41 +26,59 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
 `;
 
-const Title = styled.h3`
-  margin: 12px 0;
+const MetaTime = styled.span`
+  font-size: 13px;
+  color: #9ca3af;
+`;
+
+const Title = styled.h2`
+  margin: 18px 0 12px 0;
   font-size: 22px;
+  font-weight: 700;
   cursor: pointer;
+  line-height: 1.4;
 `;
 
 const Content = styled.p`
   color: #4b5563;
-  margin-bottom: 14px;
-  line-height: 1.6;
+  line-height: 1.7;
+  font-size: 15px;
+`;
+
+const ImageWrapper = styled.div`
+  width: 100%;
+  height: 420px;
+  margin-top: 20px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const Image = styled.img`
-  width: 100%;
-  border-radius: 12px;
-  margin: 12px 0;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
 `;
 
 const Footer = styled.div`
   display: flex;
-  gap: 30px;
+  gap: 28px;
   align-items: center;
-  margin-top: 12px;
-  font-weight: 500;
+  margin-top: 22px;
   color: #6b7280;
+  font-size: 14px;
 `;
 
 const ActionItem = styled.div`
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 `;
 
 const IconWrapper = styled.span<{ $liked?: boolean }>`
@@ -75,9 +92,6 @@ const IconWrapper = styled.span<{ $liked?: boolean }>`
   &:hover {
     transform: scale(1.1);
   }
-  &:active {
-    transform: scale(1.2);
-  }
 `;
 
 type Props = {
@@ -88,59 +102,49 @@ const PostCard = ({ post }: Props) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const handleNavigate = () => {
-    navigate(`/post/${post._id}`);
-  };
-
-  const handleLike = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    dispatch(toggleLike(post._id));
-  };
-
   const previewContent =
-    post.content.length > 140
-      ? post.content.slice(0, 140) + "..."
+    post.content.length > 160
+      ? post.content.slice(0, 160) + "..."
       : post.content;
 
   return (
     <Card>
       <Header>
         <UserLink user={post.author} />
-        <span>{timeAgo(post.createdAt)}</span>
+        <MetaTime>{timeAgo(post.createdAt)}</MetaTime>
       </Header>
 
-      <Title onClick={handleNavigate}>
+      <Title onClick={() => navigate(`/post/${post._id}`)}>
         {post.title}
       </Title>
 
       <Content>{previewContent}</Content>
 
       {post.images?.length > 0 && (
-        <Image src={`http://localhost:5000${post.images[0]}`} />
+        <ImageWrapper>
+          <Image src={`http://localhost:5000${post.images[0]}`} />
+        </ImageWrapper>
       )}
 
       <Footer>
         <ActionItem>
           <IconWrapper
             $liked={!!post.isLikedByCurrentUser}
-            onClick={handleLike}
+            onClick={() => dispatch(toggleLike(post._id))}
           >
             {post.isLikedByCurrentUser ? <FaHeart /> : <FiHeart />}
           </IconWrapper>
-
           <span>{post.likesCount}</span>
         </ActionItem>
 
         <ActionItem>
           <IconWrapper
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/post/${post._id}?focus=comment`);
-            }}
+            onClick={() =>
+              navigate(`/post/${post._id}?focus=comment`)
+            }
           >
             <FaRegComment />
           </IconWrapper>
-
           <span>{post.commentsCount}</span>
         </ActionItem>
       </Footer>

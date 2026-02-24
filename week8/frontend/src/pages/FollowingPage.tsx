@@ -5,6 +5,7 @@ import { useAppSelector, useAppDispatch } from "../redux/hooks";
 import { useEffect } from "react";
 import { fetchUserById } from "../redux/slices/usersSlice";
 import UserLink from "../components/common/UserLink";
+import FollowButton from "../components/common/FollowButton";
 
 const Wrapper = styled.div`
   max-width: 800px;
@@ -34,8 +35,16 @@ const BackBtn = styled.button`
 `;
 
 const UserRow = styled.div`
-  padding: 15px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0;
   border-bottom: 1px solid #f1f5f9;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: #f9fafb;
+  }
 `;
 
 const FollowingPage = () => {
@@ -78,7 +87,8 @@ const FollowingPage = () => {
         )
         .map((user: any) => (
             <UserRow key={user._id}>
-            <UserLink user={user} />
+              <UserLink user={user} />
+              <FollowButton userId={user._id} />
             </UserRow>
         ))}
     </Wrapper>

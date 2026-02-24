@@ -1,12 +1,12 @@
 
 import styled from "styled-components";
-import { useState } from "react";
-import { useAppDispatch } from "../../redux/hooks";
-import { registerUser } from "../../redux/slices/authSlice";
+import { useState, useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { registerUser, clearError } from "../../redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import AuthTabs from "./AuthTabs";
 
-const Container = styled.div`
+const Container = styled.form`
   width: 380px;
 `;
 
@@ -40,6 +40,13 @@ const Input = styled.input`
   }
 `;
 
+const ServerError = styled.p`
+  color: #ef4444;
+  font-size: 14px;
+  margin-bottom: 15px;
+  text-align: center;
+`;
+
 const Button = styled.button`
   width: 100%;
   padding: 14px;
@@ -70,32 +77,47 @@ const SwitchLink = styled.span`
 const RegisterForm = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const authError = useAppSelector((state) => state.auth.error);
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = async () => {
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
     const result = await dispatch(
       registerUser({ username, email, password })
     );
+
     if (registerUser.fulfilled.match(result)) {
       navigate("/login", { replace: true });
     }
   };
 
   return (
-    <Container>
+    <Container onSubmit={handleSubmit}>
       <AuthTabs />
 
       <Heading>Create Account</Heading>
       <SubText>Enter your details to create an account</SubText>
 
       <Label>Username</Label>
-      <Input value={username} onChange={(e) => setUsername(e.target.value)} />
+      <Input
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+      />
 
       <Label>Email address</Label>
-      <Input value={email} onChange={(e) => setEmail(e.target.value)} />
+      <Input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
       <Label>Password</Label>
       <Input
@@ -104,7 +126,9 @@ const RegisterForm = () => {
         onChange={(e) => setPassword(e.target.value)}
       />
 
-      <Button onClick={handleSubmit}>Create Account</Button>
+      {authError && <ServerError>{authError}</ServerError>}
+
+      <Button type="submit">Create Account</Button>
 
       <SwitchText>
         Already have an account?{" "}

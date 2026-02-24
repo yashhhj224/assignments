@@ -7,26 +7,33 @@ import Sidebar from "./Sidebar";
 const LayoutWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
+  background: #f3f4f6;
 `;
 
 const ContentWrapper = styled.div`
   display: flex;
   flex: 1;
-  overflow: hidden;
 `;
 
 const SidebarWrapper = styled.div`
-  width: 240px;
+  width: 260px;
   background: white;
   border-right: 1px solid #e5e7eb;
+  padding: 24px 18px;
 `;
 
 const BodyWrapper = styled.div`
   flex: 1;
+  display: flex;
+  justify-content: center;
   overflow-y: auto;
-  padding: 40px 60px;
-  background: #f3f4f6;
+`;
+
+const CenterContainer = styled.div`
+  width: 100%;
+  max-width: 760px;
+  padding: 40px 0 80px 0;
 `;
 
 const FeedLayout = () => {
@@ -40,7 +47,9 @@ const FeedLayout = () => {
         </SidebarWrapper>
 
         <BodyWrapper>
-          <Outlet />
+          <CenterContainer>
+            <Outlet />
+          </CenterContainer>
         </BodyWrapper>
       </ContentWrapper>
     </LayoutWrapper>

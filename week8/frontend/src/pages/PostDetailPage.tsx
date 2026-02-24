@@ -4,15 +4,14 @@ import { useParams } from "react-router-dom";
 import PostDetail from "../components/posts/PostDetail";
 
 const Wrapper = styled.div`
-  min-height: 100vh;
   background: #f3f4f6;
-  padding: 10px 10px;
+  min-height: 100vh;
 `;
 
 const Container = styled.div`
-  max-width: 1200px;
-  margin: auto;
-  padding: 0
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0px 0 80px 0;
 `;
 
 const PostDetailPage = () => {

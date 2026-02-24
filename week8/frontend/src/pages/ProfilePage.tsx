@@ -11,12 +11,13 @@ import PostCard from "../components/posts/PostCard";
 const Wrapper = styled.div`
   min-height: 100vh;
   background: #f3f4f6;
-  padding: 10px 40px;
+  padding: 0px 40px;
 `;
 
 const Container = styled.div`
-  max-width: 900px;
-  margin: auto;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0px 0 80px 0;
 `;
 
 const EmptyText = styled.p`

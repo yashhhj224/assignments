@@ -23,12 +23,14 @@ const Row = styled.div`
 const Info = styled.div`
   display: flex;
   flex-direction: column;
+  width: 100%;
 `;
 
 const UsernameRow = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
 `;
 
 const Username = styled.h2`
@@ -46,10 +48,12 @@ const Clickable = styled.span`
   color: #4338ca;
 `;
 
+const ActionWrapper = styled.div`
+  margin-left: auto;
+`;
+
 const EditButton = styled.button`
-  position: absolute;
-  top: 20px;
-  right: 20px;
+  margin-left: auto;
 
   padding: 8px 16px;
   border-radius: 8px;
@@ -87,10 +91,15 @@ const ProfileHeader = ({ user, isOwnProfile }: Props) => {
           <Info>
             <UsernameRow>
               <Username>{user.username}</Username>
-
-              {!isOwnProfile && (
-                <FollowButton userId={user._id} />
-              )}
+                <ActionWrapper>
+                  {isOwnProfile ? (
+                    <EditButton onClick={() => setIsEditing(true)}>
+                      Edit Profile
+                    </EditButton>
+                  ) : (
+                    <FollowButton userId={user._id} />
+                  )}
+                </ActionWrapper>
             </UsernameRow>
 
             <Meta>
@@ -113,11 +122,6 @@ const ProfileHeader = ({ user, isOwnProfile }: Props) => {
           </Info>
         </Row>
 
-        {isOwnProfile && (
-          <EditButton onClick={() => setIsEditing(true)}>
-            Edit Profile
-          </EditButton>
-        )}
       </Card>
 
       {isEditing && (

@@ -34,7 +34,11 @@ export const updateProfileController = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.userId as string;
 
-    const updatedUser = await updateProfileService(userId, req.body);
+    const updatedUser = await updateProfileService(
+      userId,
+      req.body,
+      req.file
+    );
 
     return successResponse(
       res,

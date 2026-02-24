@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { useAppDispatch } from "../../redux/hooks";
 import { logout } from "../../redux/slices/authSlice";
 import { searchUsers } from "../../redux/slices/usersSlice";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import SearchModal from "../ui/SearchModal";
 
@@ -20,9 +20,14 @@ const HeaderWrapper = styled.div`
   z-index: 10;
 `;
 
-const Brand = styled.h2`
+const Brand = styled(Link)`
   font-weight: 700;
   color: #4338ca;
+  text-decoration: none;
+  font-size: 22px;
+  &:hover {
+    opacity: 0.8;
+  }
 `;
 
 const SearchInput = styled.input`
@@ -67,7 +72,7 @@ const Header = () => {
   return (
     <>
       <HeaderWrapper>
-        <Brand>SocialGram</Brand>
+        <Brand to="/home">SocialGram</Brand>
 
         <SearchInput
           placeholder="Search users..."

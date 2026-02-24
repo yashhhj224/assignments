@@ -1,5 +1,5 @@
 
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "http://localhost:5000/api/auth";
 
 export const loginApi = async (payload: {
   email: string;
@@ -16,7 +16,7 @@ export const loginApi = async (payload: {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message || "Login failed");
+    throw new Error(data.message || "Invalid email or password");
   }
 
   return data.data;
@@ -44,16 +44,14 @@ export const registerApi = async (payload: {
   return data.data;
 };
 
-export const updateProfileApi = async (
-  formData: FormData
-) => {
+export const updateProfileApi = async (formData: FormData) => {
   const token = localStorage.getItem("token");
 
   if (!token) {
     throw new Error("Unauthorized");
   }
 
-  const response = await fetch(`${BASE_URL}/profile`, {
+  const response = await fetch("http://localhost:5000/api/profile", {
     method: "PUT",
     headers: {
       Authorization: `Bearer ${token}`
@@ -67,5 +65,5 @@ export const updateProfileApi = async (
     throw new Error(data.message || "Profile update failed");
   }
 
-  return data; 
+  return data;
 };

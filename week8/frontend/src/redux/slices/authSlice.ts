@@ -29,31 +29,42 @@ export const loginUser = createAsyncThunk(
   "auth/login",
   async (
     payload: { email: string; password: string },
-    { dispatch }
+    { dispatch, rejectWithValue }
   ) => {
-    const data = await loginApi(payload);
-    dispatch(fetchMyFollowing());
-    return data;
+    try {
+      const data = await loginApi(payload);
+      dispatch(fetchMyFollowing());
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Invalid email or password");
+    }
   }
 );
 
 export const registerUser = createAsyncThunk(
   "auth/register",
-  async (payload: {
-    username: string;
-    email: string;
-    password: string;
-  }) => {
-    const data = await registerApi(payload);
-    return data;
+  async (
+    payload: { username: string; email: string; password: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const data = await registerApi(payload);
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Registration failed");
+    }
   }
 );
 
 export const updateProfile = createAsyncThunk(
   "auth/updateProfile",
-  async (formData: FormData) => {
-    const res = await updateProfileApi(formData);
-    return res; 
+  async (formData: FormData, { rejectWithValue }) => {
+    try {
+      const res = await updateProfileApi(formData);
+      return res;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Profile update failed");
+    }
   }
 );
 
@@ -63,14 +74,11 @@ export const loadUserFromStorage = createAsyncThunk(
     const token = localStorage.getItem("token");
     if (!token) return null;
 
-    const res = await fetch(
-      "http://localhost:5000/api/profile",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+    const res = await fetch("http://localhost:5000/api/profile", {
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-    );
+    });
 
     const data = await res.json();
 
@@ -88,12 +96,16 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       localStorage.removeItem("token");
+    },
+    clearError(state) {
+      state.error = null;
     }
   },
   extraReducers: (builder) => {
     builder
       .addCase(loginUser.pending, (state) => {
         state.isLoading = true;
+        state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -103,7 +115,19 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || "Login failed";
+        state.error = action.payload as string;
+      })
+
+      .addCase(registerUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
       })
 
       .addCase(loadUserFromStorage.fulfilled, (state, action) => {
@@ -128,18 +152,18 @@ const authSlice = createSlice({
 
       .addCase(updateProfile.pending, (state) => {
         state.isLoading = true;
+        state.error = null;
       })
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.data; // important
+        state.user = action.payload.data;
       })
       .addCase(updateProfile.rejected, (state, action) => {
         state.isLoading = false;
-        state.error =
-          action.error.message || "Profile update failed";
+        state.error = action.payload as string;
       });
   }
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, clearError } = authSlice.actions;
 export default authSlice.reducer;

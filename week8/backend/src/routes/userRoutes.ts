@@ -9,12 +9,13 @@ import {
   changePasswordController,
   searchUsersController
 } from "../controllers/userController";
+import { upload } from "../middlewares/uploadMiddleware";
 
 const router = Router();
 
 router.get("/profile", authMiddleware, getProfileController);
-router.put("/profile", authMiddleware, updateProfileController);
 
+router.put("/profile", authMiddleware, upload.single("profilePic"), updateProfileController);
 router.get("/users", authMiddleware, getAllUsersController);
 
 router.get("/users/search", authMiddleware, searchUsersController);

@@ -1,5 +1,6 @@
 
 import styled from "styled-components";
+import logo from "/logo.png"
 
 const Container = styled.div`
   height: 100%;
@@ -23,6 +24,10 @@ const LogoBox = styled.div`
   height: 44px;
   background: white;
   border-radius: 10px;
+  background-image: url(${logo});
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 `;
 
 const BrandName = styled.h2`
