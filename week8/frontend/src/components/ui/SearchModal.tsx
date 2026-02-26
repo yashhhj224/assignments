@@ -21,22 +21,37 @@ const Modal = styled.div`
   padding: 20px;
 `;
 
+const Message = styled.div`
+  padding: 30px 0;
+  text-align: center;
+  color: #6b7280;
+  font-weight: 500;
+`;
+
 type Props = {
   onClose: () => void;
 };
 
 const SearchModal = ({ onClose }: Props) => {
-  const { searchResults } = useAppSelector(
+  const { searchResults, isLoading } = useAppSelector(
     (state) => state.users
   );
 
   return (
     <Overlay onClick={onClose}>
       <Modal onClick={(e) => e.stopPropagation()}>
-        <FollowersFollowingList
-          type="all"
-          users={searchResults}
-        />
+        {isLoading && <Message>Searching users...</Message>}
+
+        {!isLoading && searchResults.length === 0 && (
+          <Message>No users found matching your search.</Message>
+        )}
+
+        {!isLoading && searchResults.length > 0 && (
+          <FollowersFollowingList
+            type="all"
+            users={searchResults}
+          />
+        )}
       </Modal>
     </Overlay>
   );

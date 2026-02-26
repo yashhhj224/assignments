@@ -5,9 +5,11 @@ import { useAppSelector } from "../../redux/hooks";
 import { FiHome, FiUsers, FiUser, FiPlusSquare } from "react-icons/fi";
 
 const Wrapper = styled.div`
+  position: sticky;
+  top: 70px;
+  padding: 24px 18px;
   display: flex;
   flex-direction: column;
-  height: 100%;
 `;
 
 const Section = styled.div`
@@ -19,7 +21,7 @@ const Section = styled.div`
 const MenuItem = styled(NavLink)`
   display: flex;
   align-items: center;
-  gap: 12px;  
+  gap: 12px;
   padding: 12px 16px;
   border-radius: 12px;
   text-decoration: none;
@@ -41,7 +43,7 @@ const MenuItem = styled(NavLink)`
 const ButtonItem = styled.div<{ $active?: boolean }>`
   display: flex;
   align-items: center;
-  gap: 12px;  
+  gap: 12px;
   padding: 12px 16px;
   border-radius: 12px;
   cursor: pointer;
@@ -56,6 +58,12 @@ const ButtonItem = styled.div<{ $active?: boolean }>`
   }
 `;
 
+const Divider = styled.div`
+  height: 1px;
+  background: #e5e7eb;
+  margin: 20px 0;
+`;
+
 const NewPostBtn = styled(NavLink)`
   display: flex;
   align-items: center;
@@ -63,27 +71,17 @@ const NewPostBtn = styled(NavLink)`
   gap: 10px;
   padding: 14px;
   border-radius: 14px;
-  background: linear-gradient(135deg,#4338ca,#6366f1);
+  background: linear-gradient(135deg, #4338ca, #6366f1);
   color: white;
   text-decoration: none;
   font-weight: 600;
   box-shadow: 0 6px 14px rgba(67, 56, 202, 0.2);
   transition: all 0.2s ease;
 
-  svg {
-    font-size: 18px;
-  }
-
   &:hover {
     transform: translateY(-1px);
     box-shadow: 0 8px 18px rgba(67, 56, 202, 0.25);
   }
-`;
-
-const Divider = styled.div`
-  height: 1px;
-  background: #e5e7eb;
-  margin: 20px 0;
 `;
 
 const Sidebar = () => {
@@ -120,9 +118,9 @@ const Sidebar = () => {
           <FiUser />
           Profile
         </ButtonItem>
-      </Section>
 
-      <Divider />
+        <Divider />
+      </Section>
 
       <NewPostBtn to="/create-post">
         <FiPlusSquare />

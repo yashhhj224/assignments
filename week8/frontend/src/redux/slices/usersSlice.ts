@@ -85,11 +85,20 @@ const usersSlice = createSlice({
       .addCase(fetchUserById.fulfilled, (state, action) => {
         state.selectedUser = action.payload;
       })
+
       .addCase(fetchAllUsers.fulfilled, (state, action) => {
         state.users = action.payload;
       })
+
+      .addCase(searchUsers.pending, (state) => {
+        state.isLoading = true;
+      })
       .addCase(searchUsers.fulfilled, (state, action) => {
         state.searchResults = action.payload;
+        state.isLoading = false;
+      })
+      .addCase(searchUsers.rejected, (state) => {
+        state.isLoading = false;
       })
 
       .addCase(followUser.fulfilled, (state, action) => {
@@ -132,6 +141,7 @@ const usersSlice = createSlice({
             );
         }
       })
+
       .addCase(updateProfile.fulfilled, (state, action) => {
         const updatedUser = action.payload.data;
 
@@ -142,7 +152,8 @@ const usersSlice = createSlice({
         state.users = state.users.map((user: any) =>
           user._id === updatedUser._id ? updatedUser : user
         );
-      })
+      }
+    );
   }
 });
 

@@ -14,38 +14,52 @@ const LayoutWrapper = styled.div`
 const ContentWrapper = styled.div`
   display: flex;
   flex: 1;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+  }
 `;
 
 const SidebarWrapper = styled.div`
   width: 260px;
   background: white;
   border-right: 1px solid #e5e7eb;
-  padding: 24px 18px;
+
+  @media (max-width: 1024px) {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
 `;
 
 const BodyWrapper = styled.div`
   flex: 1;
   display: flex;
   justify-content: center;
-  overflow-y: auto;
+
+  @media (max-width: 1024px) {
+    padding-bottom: 70px;
+  }
 `;
 
 const CenterContainer = styled.div`
   width: 100%;
   max-width: 760px;
   padding: 40px 0 80px 0;
+
+  @media (max-width: 768px) {
+    padding: 20px 16px 80px 16px;
+  }
 `;
 
 const FeedLayout = () => {
   return (
     <LayoutWrapper>
       <Header />
-
       <ContentWrapper>
         <SidebarWrapper>
           <Sidebar />
         </SidebarWrapper>
-
         <BodyWrapper>
           <CenterContainer>
             <Outlet />

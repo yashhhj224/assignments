@@ -1,6 +1,5 @@
 
 import styled from "styled-components";
-import { useState } from "react";
 import { useAppSelector } from "../../redux/hooks";
 import UserLink from "../common/UserLink";
 import FollowButton from "../common/FollowButton";
@@ -17,13 +16,6 @@ const TopBar = styled.div`
   margin-bottom: 20px;
 `;
 
-const SearchInput = styled.input`
-  width: 250px;
-  padding: 8px 14px;
-  border-radius: 20px;
-  border: 1px solid #e5e7eb;
-`;
-
 const UserRow = styled.div`
   display: flex;
   justify-content: space-between;
@@ -35,9 +27,10 @@ const UserRow = styled.div`
 type Props = {
   type: "followers" | "following" | "all";
   users?: any[];
+  filter?: "all" | "followers" | "following";
 };
 
-const FollowersFollowingList = ({ type, users }: Props) => {
+const FollowersFollowingList = ({ type, users, filter }: Props) => {
   const selectedUser = useAppSelector(
     (state) => state.users.selectedUser
   );
@@ -45,8 +38,6 @@ const FollowersFollowingList = ({ type, users }: Props) => {
   const currentUser = useAppSelector(
     (state) => state.auth.user
   );
-
-  const [search, setSearch] = useState("");
 
   let rawList: any[] = [];
 
@@ -58,40 +49,42 @@ const FollowersFollowingList = ({ type, users }: Props) => {
     rawList = selectedUser?.following || [];
   }
 
-  const safeList = rawList.filter(
+  let safeList = rawList.filter(
     (u: any) =>
       typeof u === "object" &&
       u?._id &&
       u?._id !== currentUser?._id
   );
 
-  const filtered = safeList.filter((user: any) =>
-    user.username
-      ?.toLowerCase()
-      ?.includes(search.toLowerCase())
-  );
+  if (type === "all" && filter && filter !== "all") {
+    if (filter === "followers") {
+      safeList = safeList.filter((u: any) =>
+        currentUser?.followers?.some(
+          (f: any) => f._id === u._id
+        )
+      );
+    } else {
+      safeList = safeList.filter((u: any) =>
+        currentUser?.following?.some(
+          (f: any) => f._id === u._id
+        )
+      );
+    }
+  }
 
   return (
     <Wrapper>
-      <TopBar>
-        <h3>
-          {type === "followers"
-            ? "Followers"
-            : type === "following"
-            ? "Following"
-            : "Users"}
-        </h3>
+      {type !== "all" && (
+        <TopBar>
+          <h3>
+            {type === "followers"
+              ? "Followers"
+              : "Following"}
+          </h3>
+        </TopBar>
+      )}
 
-        <SearchInput
-          placeholder="Search..."
-          value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
-        />
-      </TopBar>
-
-      {filtered.map((user: any) => (
+      {safeList.map((user: any) => (
         <UserRow key={user._id}>
           <UserLink user={user} />
           <FollowButton userId={user._id} />
