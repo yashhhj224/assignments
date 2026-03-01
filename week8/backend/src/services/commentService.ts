@@ -6,6 +6,8 @@ import { ApiError } from "../utils/ApiError";
 import { HTTP_STATUS } from "../constants/httpStatus";
 import { isValidMongoId, isNonEmptyString, normalizeText } from "../utils/validators";
 import { MESSAGES } from "../constants/messages";
+import { createNotificationService, getUnreadNotificationCountService } from "./notificationService";
+import { getIO } from "../socket"; 
 
 export const createCommentService = async (
   userId: string,
@@ -46,6 +48,34 @@ export const createCommentService = async (
   });
 
   const populatedComment = await comment.populate("user", "-password");
+
+  if (post.author.toString() !== userId) {
+    const notification = await createNotificationService(
+      post.author.toString(),
+      userId,
+      "COMMENT",
+      postId
+    );
+
+    if (notification) {
+      const io = getIO();
+
+      io.to(post.author.toString()).emit(
+        "new_notification",
+        notification
+      );
+
+      const unreadData = 
+        await getUnreadNotificationCountService(
+          post.author.toString()
+        );
+
+        io.to(post.author.toString()).emit(
+          "notification_unread_updated",
+          unreadData
+        );
+    }
+  }
 
   return populatedComment;
 };

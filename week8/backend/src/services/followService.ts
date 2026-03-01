@@ -4,6 +4,9 @@ import { ApiError } from "../utils/ApiError";
 import { HTTP_STATUS } from "../constants/httpStatus";
 import { isValidMongoId } from "../utils/validators";
 import { MESSAGES } from "../constants/messages";
+import { createNotificationService, getUnreadNotificationCountService } from "./notificationService";
+import { getIO } from "../socket"; 
+import { getUnreadConversationCountService } from "./chatService";
 
 export const followUserService = async (
   currentUserId: string,
@@ -36,6 +39,26 @@ export const followUserService = async (
 
   await currentUser.save();
   await targetUser.save();
+
+  const notification = await createNotificationService(
+    targetUserId,
+    currentUserId,
+    "FOLLOW"
+  );
+
+  if (notification) {
+    const io = getIO();
+
+    io.to(targetUserId).emit("new_notification", notification);
+
+    const unreadData = 
+      await getUnreadNotificationCountService(targetUserId);
+    
+    io.to(targetUserId).emit(
+      "notification_unread_updated",
+      unreadData
+    );
+  }
 };
 
 export const unfollowUserService = async (

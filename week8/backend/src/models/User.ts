@@ -9,6 +9,7 @@ export interface IUser extends Document {
   profilePic: string;
   following: mongoose.Types.ObjectId[];
   followers: mongoose.Types.ObjectId[];
+  lastSeen?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -51,7 +52,11 @@ const userSchema = new Schema<IUser>(
         ref: "User",
         default: []
       }
-    ]
+    ],
+    lastSeen: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );

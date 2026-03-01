@@ -2,7 +2,10 @@
 import styled from "styled-components";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAppSelector } from "../../redux/hooks";
-import { FiHome, FiUsers, FiUser, FiPlusSquare } from "react-icons/fi";
+import { FiHome, FiUsers, FiUser, FiPlusSquare, FiBell, FiMessageCircle } from "react-icons/fi";
+import { useEffect } from "react";
+import { useAppDispatch } from "../../redux/hooks";
+import { fetchUnreadNotificationCount } from "../../redux/slices/notificationSlice";
 
 const Wrapper = styled.div`
   position: sticky;
@@ -84,10 +87,27 @@ const NewPostBtn = styled(NavLink)`
   }
 `;
 
+const NotificationCount = styled.span`
+  margin-left: auto;
+  background: #ef4444;
+  color: white;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-weight: 600;
+`;
+
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (user?._id) {
+      dispatch(fetchUnreadNotificationCount());
+    }
+  }, [user?._id, dispatch]);
 
   const handleProfileClick = () => {
     if (user?._id) {
@@ -98,6 +118,9 @@ const Sidebar = () => {
   const isProfileActive =
     location.pathname.startsWith("/profile");
 
+  const unreadCount = useAppSelector(
+    (state) => state.notifications.unreadCount
+  );
   return (
     <Wrapper>
       <Section>
@@ -119,6 +142,20 @@ const Sidebar = () => {
           Profile
         </ButtonItem>
 
+        <MenuItem to="/chat">
+          <FiMessageCircle />
+          Messages
+        </MenuItem>
+
+        <MenuItem to="/notifications">
+          <FiBell />
+          Notifications
+          {unreadCount > 0 && (
+            <NotificationCount>
+              {unreadCount}
+            </NotificationCount>
+          )}
+        </MenuItem>
         <Divider />
       </Section>
 

@@ -11,10 +11,10 @@ const TabsWrapper = styled.div`
   margin-bottom: 40px;
 `;
 
-const TabItem = styled.div<{ active?: boolean }>`
+const TabItem = styled.div<{ $active?: boolean }>`
   font-weight: 600;
   cursor: pointer;
-  color: ${({ active }) => (active ? "#4338ca" : "#94a3b8")};
+  color: ${({ $active }) => ($active ? "#4338ca" : "#94a3b8")};
   transition: color 0.3s ease;
 `;
 
@@ -54,7 +54,7 @@ const AuthTabs = () => {
     <TabsWrapper>
       <TabItem
         ref={loginRef}
-        active={isLogin}
+        $active={isLogin}
         onClick={() => navigate("/login")}
       >
         Login
@@ -62,7 +62,7 @@ const AuthTabs = () => {
 
       <TabItem
         ref={registerRef}
-        active={!isLogin}
+        $active={!isLogin}
         onClick={() => navigate("/register")}
       >
         Register

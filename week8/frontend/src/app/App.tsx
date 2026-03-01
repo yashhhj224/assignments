@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "../redux/hooks";
 import { loadUserFromStorage } from "../redux/slices/authSlice";
-
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import HomePage from "../pages/HomePage";
@@ -15,6 +14,8 @@ import FeedLayout from "../components/layout/FeedLayout";
 import FollowersPage from "../pages/FollowersPage";
 import FollowingPage from "../pages/FollowingPage";
 import UsersPage from "../pages/UserPage";
+import NotificationsPage from "../pages/NotificationsPage";
+import ChatPage from "../pages/ChatPage";
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const { token } = useAppSelector((state) => state.auth);
@@ -66,6 +67,9 @@ const App = () => {
         <Route path="/profile/:userId" element={<ProfilePage />} />
         <Route path="/profile/:userId/followers" element={<FollowersPage />} />
         <Route path="/profile/:userId/following" element={<FollowingPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/chat" element={<ChatPage />} />
+
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />

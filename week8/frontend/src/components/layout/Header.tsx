@@ -145,7 +145,7 @@ const Header = () => {
     dispatch(logout());
     navigate("/login", { replace: true });
   };
-
+  
   return (
     <HeaderWrapper>
       <Brand to="/home">SocialGram</Brand>

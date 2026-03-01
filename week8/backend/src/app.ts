@@ -12,6 +12,8 @@ import uploadRoutes from "./routes/uploadRoutes";
 import { errorMiddleware } from "./middlewares/errorMiddleware";
 import { HTTP_STATUS } from "./constants/httpStatus";
 import { MESSAGES } from "./constants/messages";
+import chatRoutes from "./routes/chatRoutes";
+import notificationRoutes from "./routes/notificationRoutes";
 
 const app = express();
 
@@ -29,13 +31,15 @@ const uploadsPath = path.join(__dirname, "..", "uploads");
 
 app.use("/uploads", express.static(uploadsPath));
 
-app.use("/api/auth", authRoutes);
+app.use("/api", authRoutes);
 app.use("/api", userRoutes);
 app.use("/api", followRoutes);
 app.use("/api", postRoutes);
 app.use("/api", likeRoutes);
 app.use("/api", commentRoutes);
 app.use("/api", uploadRoutes);
+app.use("/api", chatRoutes);
+app.use("/api", notificationRoutes);
 
 app.use((req, res) => {
   res.status(HTTP_STATUS.NOT_FOUND).json({

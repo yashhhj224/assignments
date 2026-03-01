@@ -10,6 +10,7 @@ import {
   followUser,
   unfollowUser
 } from "./followSlice";
+import { initializeSocket, getSocket } from "../../socket";
 
 type AuthState = {
   user: any | null;
@@ -96,6 +97,11 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       localStorage.removeItem("token");
+
+      try {
+        const socket = getSocket();
+        socket.disconnect();
+      } catch {}
     },
     clearError(state) {
       state.error = null;
@@ -109,9 +115,11 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
+        const token = action.payload.token;
         state.user = action.payload.user;
         state.token = action.payload.token;
         localStorage.setItem("token", action.payload.token);
+        initializeSocket(token);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -134,6 +142,7 @@ const authSlice = createSlice({
         if (action.payload) {
           state.user = action.payload.user;
           state.token = action.payload.token;
+          initializeSocket(action.payload.token);
         }
       })
 
