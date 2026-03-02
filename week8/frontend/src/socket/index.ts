@@ -17,9 +17,6 @@ export const initializeSocket = (token: string) => {
   return socket;
 };
 
-export const getSocket = (): Socket => {
-  if (!socket) {
-    throw new Error("Socket not initialized");
-  }
+export const getSocket = (): Socket | null => {
   return socket;
 };

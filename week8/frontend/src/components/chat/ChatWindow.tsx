@@ -1,10 +1,10 @@
 
+import styled from "styled-components";
+import { useAppSelector, useAppDispatch } from "../../redux/hooks";
 import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { fetchMessages } from "../../redux/slices/chatSlice";
 import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
-import styled from "styled-components";
 
 const Wrapper = styled.div`
   display: flex;
@@ -12,14 +12,25 @@ const Wrapper = styled.div`
   height: 100%;
 `;
 
-const MessagesArea = styled.div`
+const MessagesContainer = styled.div`
   flex: 1;
-  padding: 20px;
   overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+`;
+
+const EmptyState = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #6b7280;
 `;
 
 const ChatWindow = () => {
   const dispatch = useAppDispatch();
+
   const { activeConversationId, messages } =
     useAppSelector((state) => state.chat);
 
@@ -29,16 +40,20 @@ const ChatWindow = () => {
     }
   }, [activeConversationId, dispatch]);
 
-  const currentMessages =
-    messages[activeConversationId || ""] || [];
+  if (!activeConversationId)
+    return <EmptyState>Select a user to start chatting</EmptyState>;
+
+  const conversationMessages =
+    messages[activeConversationId] || [];
 
   return (
     <Wrapper>
-      <MessagesArea>
-        {currentMessages.map((msg) => (
+      <MessagesContainer>
+        {conversationMessages.map((msg) => (
           <MessageBubble key={msg._id} message={msg} />
         ))}
-      </MessagesArea>
+      </MessagesContainer>
+
       <MessageInput />
     </Wrapper>
   );

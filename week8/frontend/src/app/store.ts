@@ -6,6 +6,7 @@ import usersReducer from "../redux/slices/usersSlice";
 import followReducer from "../redux/slices/followSlice";
 import commentsReducer from "../redux/slices/commentsSlice";
 import notificationReducer from "../redux/slices/notificationSlice";
+import chatReducer from "../redux/slices/chatSlice";
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
     users: usersReducer,
     comments: commentsReducer,
     notifications: notificationReducer,
+    chat: chatReducer,
   }
 });
 

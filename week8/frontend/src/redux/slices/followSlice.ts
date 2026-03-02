@@ -1,16 +1,22 @@
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
+export interface FollowingUser {
+  _id: string;
+  username: string;
+  profilePic?: string;
+}
+
 type FollowState = {
-  followingIds: string[];
+  following: FollowingUser[];
   isLoading: boolean;
   error: string | null;
 };
 
 const initialState: FollowState = {
-  followingIds: [],
+  following: [],
   isLoading: false,
-  error: null
+  error: null,
 };
 
 export const fetchMyFollowing = createAsyncThunk(
@@ -22,33 +28,33 @@ export const fetchMyFollowing = createAsyncThunk(
       "http://localhost:5000/api/following",
       {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
 
     const data = await res.json();
 
-    return data.data.map((user: any) => user._id);
+    return data.data; // full user objects
   }
 );
 
 export const followUser = createAsyncThunk(
   "follow/followUser",
-  async (userId: string) => {
+  async (user: FollowingUser) => {
     const token = localStorage.getItem("token");
 
     await fetch(
-      `http://localhost:5000/api/follow/${userId}`,
+      `http://localhost:5000/api/follow/${user._id}`,
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
 
-    return userId;
+    return user;
   }
 );
 
@@ -62,8 +68,8 @@ export const unfollowUser = createAsyncThunk(
       {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
 
@@ -78,19 +84,25 @@ const followSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchMyFollowing.fulfilled, (state, action) => {
-        state.followingIds = action.payload;
+        state.following = action.payload;
       })
+
       .addCase(followUser.fulfilled, (state, action) => {
-        if (!state.followingIds.includes(action.payload)) {
-          state.followingIds.push(action.payload);
+        const exists = state.following.some(
+          (u) => u._id === action.payload._id
+        );
+
+        if (!exists) {
+          state.following.push(action.payload);
         }
       })
+
       .addCase(unfollowUser.fulfilled, (state, action) => {
-        state.followingIds = state.followingIds.filter(
-          (id) => id !== action.payload
+        state.following = state.following.filter(
+          (u) => u._id !== action.payload
         );
       });
-  }
+  },
 });
 
 export default followSlice.reducer;

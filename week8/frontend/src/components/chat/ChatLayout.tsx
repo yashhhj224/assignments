@@ -2,7 +2,13 @@
 import styled from "styled-components";
 import ConversationList from "./ConversationList";
 import ChatWindow from "./ChatWindow";
-import { useAppSelector } from "../../redux/hooks";
+import { useAppDispatch } from "../../redux/hooks";
+import { useEffect } from "react";
+import { getSocket } from "../../socket";
+import {
+  receiveMessage,
+  updateConversationLastMessage,
+} from "../../redux/slices/chatSlice";
 
 const Wrapper = styled.div`
   display: flex;
@@ -22,9 +28,24 @@ const Right = styled.div`
 `;
 
 const ChatLayout = () => {
-  const { activeConversationId } = useAppSelector(
-    (state) => state.chat
-  );
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    const socket = getSocket();
+
+    if (!socket) return;
+
+    const handleNewMessage = (message: any) => {
+        dispatch(receiveMessage(message));
+        dispatch(updateConversationLastMessage(message));
+    };
+
+    socket.on("new_message", handleNewMessage);
+
+    return () => {
+        socket.off("new_message", handleNewMessage);
+    };
+    }, [dispatch]);
 
   return (
     <Wrapper>
@@ -32,7 +53,7 @@ const ChatLayout = () => {
         <ConversationList />
       </Left>
       <Right>
-        {activeConversationId && <ChatWindow />}
+        <ChatWindow />
       </Right>
     </Wrapper>
   );

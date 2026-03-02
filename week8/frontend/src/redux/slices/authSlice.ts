@@ -98,10 +98,10 @@ const authSlice = createSlice({
       state.token = null;
       localStorage.removeItem("token");
 
-      try {
-        const socket = getSocket();
+      const socket = getSocket();
+      if (socket) {
         socket.disconnect();
-      } catch {}
+      }
     },
     clearError(state) {
       state.error = null;

@@ -3,9 +3,14 @@ const API_BASE = "http://localhost:5000/api";
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("No token found in localStorage");
+  }
+
   return {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
+    ...(token && { Authorization: `Bearer ${token}` }),
   };
 };
 
@@ -13,6 +18,21 @@ export const fetchConversationsApi = async () => {
   const res = await fetch(`${API_BASE}/chat/conversations`, {
     headers: getAuthHeaders(),
   });
+  return res.json();
+};
+
+export const createOrGetConversationApi = async (
+  userId: string
+) => {
+  const res = await fetch(
+    `${API_BASE}/chat/conversations`,
+    {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ targetUserId: userId }),
+    }
+  );
+
   return res.json();
 };
 

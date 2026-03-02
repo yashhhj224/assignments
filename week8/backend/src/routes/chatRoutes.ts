@@ -33,7 +33,7 @@ router.get(
 router.post(
     "/chat/messages",
     authMiddleware,
-    getMessagesController
+    sendMessageController
 );
 
 router.get(

@@ -6,6 +6,23 @@ import {
   sendMessageApi,
 } from "../../api/chatApi";
 
+export interface Message {
+  _id: string;
+  conversation: string;
+  sender: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface Conversation {
+  _id: string;
+  participants: {
+    _id: string;
+    username: string;
+  }[];
+  lastMessage?: Message;
+}
+
 export const fetchConversations = createAsyncThunk(
   "chat/fetchConversations",
   async () => {
@@ -18,7 +35,10 @@ export const fetchMessages = createAsyncThunk(
   "chat/fetchMessages",
   async (conversationId: string) => {
     const data = await fetchMessagesApi(conversationId);
-    return { conversationId, messages: data.data };
+    return { 
+        conversationId, 
+        messages: data.data.messages 
+    };
   }
 );
 
@@ -37,8 +57,8 @@ export const sendMessage = createAsyncThunk(
 );
 
 interface ChatState {
-  conversations: any[];
-  messages: Record<string, any[]>;
+  conversations: Conversation[];
+  messages: Record<string, Message[]>;
   activeConversationId: string | null;
 }
 
@@ -55,6 +75,45 @@ const chatSlice = createSlice({
     setActiveConversation(state, action) {
       state.activeConversationId = action.payload;
     },
+
+    receiveMessage(state, action) {
+      const message = action.payload;
+      const convId = message.conversationId;
+
+      if (!state.messages[convId]) {
+        state.messages[convId] = [];
+      }
+
+      const alreadyExists = state.messages[convId].some(
+        (m) => m._id === message._id
+      );
+
+      if (!alreadyExists) {
+        state.messages[convId].push(message);
+      }
+    },
+
+    updateConversationLastMessage(state, action) {
+      const message = action.payload;
+
+      const conv = state.conversations.find(
+        (c) => c._id === message.conversationId
+      );
+
+      if (conv) {
+        conv.lastMessage = message;
+      }
+    },
+
+    addConversation(state, action) {
+        const exists = state.conversations.some(
+            (c) => c._id === action.payload._id
+        );
+
+        if (!exists) {
+            state.conversations.push(action.payload);
+        }
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -66,14 +125,31 @@ const chatSlice = createSlice({
           action.payload.messages;
       })
       .addCase(sendMessage.fulfilled, (state, action) => {
-        const convId = action.payload.conversation;
+        const message = action.payload;
+        const convId = message.conversationId;
+
         if (!state.messages[convId]) {
           state.messages[convId] = [];
         }
-        state.messages[convId].push(action.payload);
+
+        state.messages[convId].push(message);
+
+        const conv = state.conversations.find(
+          (c) => c._id === convId
+        );
+
+        if (conv) {
+          conv.lastMessage = message;
+        }
       });
   },
 });
 
-export const { setActiveConversation } = chatSlice.actions;
+export const {
+  setActiveConversation,
+  receiveMessage,
+  updateConversationLastMessage,
+  addConversation
+} = chatSlice.actions;
+
 export default chatSlice.reducer;

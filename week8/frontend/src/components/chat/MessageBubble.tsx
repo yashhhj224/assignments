@@ -17,7 +17,9 @@ const Bubble = styled.div<{ $own: boolean }>`
 const MessageBubble = ({ message }: any) => {
   const { user } = useAppSelector((state) => state.auth);
 
-  const isOwn = message.sender === user?._id;
+  const isOwn =
+    message.sender === user?._id ||
+    message.sender?._id === user?._id;
 
   return (
     <Bubble $own={isOwn}>

@@ -12,6 +12,7 @@ import {
     getUnreadConversationCountService,
 } from "../services/chatService";
 import { getIO } from "../socket";
+import { Conversation } from "../models/Conversation";
 
 export const createOrGetConversationController = asyncHandler(
     async (req: Request, res: Response) => {
@@ -94,14 +95,23 @@ export const getUserConversationsController = asyncHandler(
     async(req: Request, res: Response) => {
         const currentUserId = req.userId as string;
 
-        const conversations = await getUserConversationsService(
-            currentUserId
-        );
+        const conversations = await Conversation.find({
+            participants: req.userId,
+            })
+            .populate("participants", "username profilePic")
+            .populate({
+                path: "lastMessage",
+                populate: {
+                path: "sender",
+                select: "username profilePic",
+                },
+            })
+            .sort({ updatedAt: -1 });
 
         successResponse(
-            res,
-            HTTP_STATUS.OK,
-            "Conversations fetched successfully",
+            res, 
+            200, 
+            "Conversations fetched", 
             conversations
         );
     }

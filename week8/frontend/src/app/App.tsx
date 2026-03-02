@@ -16,6 +16,7 @@ import FollowingPage from "../pages/FollowingPage";
 import UsersPage from "../pages/UserPage";
 import NotificationsPage from "../pages/NotificationsPage";
 import ChatPage from "../pages/ChatPage";
+import { initializeSocket } from "../socket";
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const { token } = useAppSelector((state) => state.auth);
@@ -31,10 +32,17 @@ const PublicRoute = ({ children }: { children: JSX.Element }) => {
 
 const App = () => {
   const dispatch = useAppDispatch();
+  const { token } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     dispatch(loadUserFromStorage());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (token) {
+      initializeSocket(token);
+    }
+  }, [token]);
 
   return (
     <Routes>

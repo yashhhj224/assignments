@@ -6,7 +6,7 @@ import { errorResponse } from "../utils/response";
 import { MESSAGES } from "../constants/messages";
 
 export const authMiddleware = (
-  req: Request,
+  req: Request,     
   res: Response,
   next: NextFunction
 ): void => {
