@@ -31,11 +31,10 @@ const ConversationItem = ({ conversation }: any) => {
         dispatch(setActiveConversation(conversation._id))
       }
     >
-      <Name>
-        {conversation.participants[0]?.username}
-      </Name>
+      <Name>{conversation.chatUser?.username}</Name>
+
       <LastMessage>
-        {conversation.lastMessage?.content}
+        {conversation.lastMessage}
       </LastMessage>
     </Wrapper>
   );

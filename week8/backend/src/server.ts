@@ -51,46 +51,37 @@ const startServer = async () => {
       }
     });
 
-    io.on("connection", (socket) => {
-      const userId = socket.data.userId;
+io.on("connection", (socket) => {
+  const userId = socket.data.userId;
 
-      console.log(`User connected: ${userId}`);
+  console.log(`User connected: ${userId}`);
 
-      socket.join(userId);
+  socket.join(userId);
 
-      addOnlineUser(userId, socket.id);
-      io.emit("user_online", { userId });
+  addOnlineUser(userId, socket.id);
 
-      socket.on("typing", ({ receiverId }) => {
-        socket.to(receiverId).emit("typing", {
-          senderId: userId,
-        });
-      });
-
-      socket.on("stop_typing", ({ receiverId }) => {
-        socket.to(receiverId).emit("stop_typing", {
-          senderId: userId,
-        });
-      });
-
-      socket.on("mark_as_seen", async ({ conversationId }) => {
-        const { markConversationAsSeenService } = await import("./services/chatService");
-
-        await markConversationAsSeenService(userId, conversationId);
-
-        socket.emit("messages_seen", { conversationId });
-      });
-
-      socket.on("disconnect", async () => {
-        removeOnlineUser(userId);
-
-        await User.findByIdAndUpdate(userId, {
-          lastSeen: new Date(),
-        });
-        
-        io.emit("user_offline", { userId });
-      });
+  socket.on("typing", ({ receiverId }) => {
+    socket.to(receiverId).emit("typing", {
+      senderId: userId,
     });
+  });
+
+  socket.on("stop_typing", ({ receiverId }) => {
+    socket.to(receiverId).emit("stop_typing", {
+      senderId: userId,
+    });
+  });
+
+  socket.on("disconnect", async () => {
+    removeOnlineUser(userId);
+
+    await User.findByIdAndUpdate(userId, {
+      lastSeen: new Date(),
+    });
+
+    console.log(`User disconnected: ${userId}`);
+  });
+});
 
     httpServer.listen(ENV.PORT, () => {
       console.log(`Server running on port ${ENV.PORT}`);

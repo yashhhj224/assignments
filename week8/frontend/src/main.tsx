@@ -8,6 +8,7 @@ import App from "./app/App";
 import { GlobalStyle } from "./styles/GlobalStyles";
 import { theme } from "./styles/theme";
 import { store } from "./app/store";
+import "./index.css";
 
 const container = document.getElementById("root");
 

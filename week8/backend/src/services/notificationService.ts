@@ -52,14 +52,14 @@ export const markAllNotificationsReadService = async(
 };
 
 export const getUnreadNotificationCountService = async (
-    userId: string
+  userId: string
 ) => {
-    const count = await Notification.countDocuments({
-        user: userId,
-        read: false,
-    });
+  const count = await Notification.countDocuments({
+    user: userId,
+    read: false,
+  });
 
-    return { getUnreadNotificationCount: count };
+  return { unreadNotificationCount: count };
 };
 
 export const markSingleNotificationReadService = async (

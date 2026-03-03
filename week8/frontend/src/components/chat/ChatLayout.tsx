@@ -1,61 +1,42 @@
 
-import styled from "styled-components";
 import ConversationList from "./ConversationList";
 import ChatWindow from "./ChatWindow";
 import { useAppDispatch } from "../../redux/hooks";
 import { useEffect } from "react";
 import { getSocket } from "../../socket";
-import {
-  receiveMessage,
-  updateConversationLastMessage,
-} from "../../redux/slices/chatSlice";
-
-const Wrapper = styled.div`
-  display: flex;
-  height: 75vh;
-  background: white;
-  border-radius: 20px;
-  overflow: hidden;
-`;
-
-const Left = styled.div`
-  width: 35%;
-  border-right: 1px solid #e5e7eb;
-`;
-
-const Right = styled.div`
-  flex: 1;
-`;
+import { receiveMessage } from "../../redux/slices/chatSlice";
 
 const ChatLayout = () => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     const socket = getSocket();
-
     if (!socket) return;
 
     const handleNewMessage = (message: any) => {
-        dispatch(receiveMessage(message));
-        dispatch(updateConversationLastMessage(message));
+      dispatch(receiveMessage(message));
     };
 
     socket.on("new_message", handleNewMessage);
 
     return () => {
-        socket.off("new_message", handleNewMessage);
+      socket.off("new_message", handleNewMessage);
     };
-    }, [dispatch]);
+  }, [dispatch]);
 
   return (
-    <Wrapper>
-      <Left>
+    <div className="h-full flex bg-white">
+      
+      {/* Conversations */}
+      <div className="w-[340px] border-r border-gray-200 flex flex-col bg-white">
         <ConversationList />
-      </Left>
-      <Right>
+      </div>
+
+      {/* Chat Window */}
+      <div className="flex-1 flex flex-col bg-gray-100">
         <ChatWindow />
-      </Right>
-    </Wrapper>
+      </div>
+    </div>
   );
 };
 

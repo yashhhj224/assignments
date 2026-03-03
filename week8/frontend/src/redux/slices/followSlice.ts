@@ -19,59 +19,47 @@ const initialState: FollowState = {
   error: null,
 };
 
+const API_BASE = "http://localhost:5000/api";
+
+const getToken = () => localStorage.getItem("token");
+
 export const fetchMyFollowing = createAsyncThunk(
   "follow/fetchMyFollowing",
   async () => {
-    const token = localStorage.getItem("token");
-
-    const res = await fetch(
-      "http://localhost:5000/api/following",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const res = await fetch(`${API_BASE}/following`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
 
     const data = await res.json();
-
-    return data.data; // full user objects
+    return data.data;
   }
 );
 
 export const followUser = createAsyncThunk(
   "follow/followUser",
-  async (user: FollowingUser) => {
-    const token = localStorage.getItem("token");
+  async (userId: string) => {
+    await fetch(`${API_BASE}/follow/${userId}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
 
-    await fetch(
-      `http://localhost:5000/api/follow/${user._id}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    return user;
+    return userId;
   }
 );
 
 export const unfollowUser = createAsyncThunk(
   "follow/unfollowUser",
   async (userId: string) => {
-    const token = localStorage.getItem("token");
-
-    await fetch(
-      `http://localhost:5000/api/follow/${userId}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    await fetch(`${API_BASE}/follow/${userId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
 
     return userId;
   }
@@ -88,13 +76,6 @@ const followSlice = createSlice({
       })
 
       .addCase(followUser.fulfilled, (state, action) => {
-        const exists = state.following.some(
-          (u) => u._id === action.payload._id
-        );
-
-        if (!exists) {
-          state.following.push(action.payload);
-        }
       })
 
       .addCase(unfollowUser.fulfilled, (state, action) => {

@@ -3,53 +3,82 @@ import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import {
   followUser,
-  unfollowUser
+  unfollowUser,
+  fetchMyFollowing,
 } from "../../redux/slices/followSlice";
+import { useState, useEffect } from "react";
 
-const Button = styled.button<{ $active: boolean }>`
-  padding: 6px 14px;
-  border-radius: 8px;
+const Button = styled.button<{ $following: boolean }>`
+  padding: 8px 16px;
+  border-radius: 20px;
   border: none;
   cursor: pointer;
   font-weight: 500;
-  background: ${({ $active }) =>
-    $active ? "#e5e7eb" : "#4338ca"};
-  color: ${({ $active }) =>
-    $active ? "#111827" : "white"};
+  transition: 0.2s ease;
+
+  background: ${({ $following }) =>
+    $following ? "#e5e7eb" : "#4338ca"};
+
+  color: ${({ $following }) =>
+    $following ? "#111827" : "white"};
 `;
 
-type Props = {
+interface Props {
   userId: string;
-};
+  username?: string;
+}
 
-const FollowButton = ({ userId }: Props) => {
+const FollowButton = ({ userId, username }: Props) => {
   const dispatch = useAppDispatch();
 
   const currentUser = useAppSelector(
     (state) => state.auth.user
   );
 
-  const followingIds = useAppSelector(
-    (state) => state.follow.followingIds
+  const followingList = useAppSelector(
+    (state) => state.follow.following
   );
+
+  const [isFollowing, setIsFollowing] = useState(false);
+
+  useEffect(() => {
+    const following =
+      Array.isArray(followingList) &&
+      followingList.some((u: any) => u._id === userId);
+
+    setIsFollowing(following);
+  }, [followingList, userId]);
+
+  const handleClick = async () => {
+    if (!currentUser) return;
+
+    if (isFollowing) {
+      const confirmUnfollow = window.confirm(
+        `Do you want to unfollow ${username || "this user"}?`
+      );
+
+      if (!confirmUnfollow) return;
+
+      setIsFollowing(false);
+
+      await dispatch(unfollowUser(userId));
+      dispatch(fetchMyFollowing());
+    } else {
+      setIsFollowing(true);
+
+      await dispatch(followUser(userId));
+    }
+    
+    await dispatch(fetchMyFollowing());
+  };
 
   if (!currentUser || currentUser._id === userId) {
     return null;
   }
 
-  const isFollowing = followingIds.includes(userId);
-
-  const handleClick = () => {
-    if (isFollowing) {
-      dispatch(unfollowUser(userId));
-    } else {
-      dispatch(followUser(userId));
-    }
-  };
-
   return (
-    <Button $active={isFollowing} onClick={handleClick}>
-      {isFollowing ? "Unfollow" : "Follow"}
+    <Button $following={isFollowing} onClick={handleClick}>
+      {isFollowing ? "Following" : "Follow"}
     </Button>
   );
 };

@@ -95,18 +95,7 @@ export const getUserConversationsController = asyncHandler(
     async(req: Request, res: Response) => {
         const currentUserId = req.userId as string;
 
-        const conversations = await Conversation.find({
-            participants: req.userId,
-            })
-            .populate("participants", "username profilePic")
-            .populate({
-                path: "lastMessage",
-                populate: {
-                path: "sender",
-                select: "username profilePic",
-                },
-            })
-            .sort({ updatedAt: -1 });
+        const conversations = await getUserConversationsService(currentUserId);
 
         successResponse(
             res, 

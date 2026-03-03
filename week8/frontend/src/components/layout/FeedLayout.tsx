@@ -1,6 +1,6 @@
 
 import styled from "styled-components";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 
@@ -35,24 +35,29 @@ const SidebarWrapper = styled.div`
 const BodyWrapper = styled.div`
   flex: 1;
   display: flex;
-  justify-content: center;
-
-  @media (max-width: 1024px) {
-    padding-bottom: 70px;
-  }
+  height: calc(100vh - 70px);
 `;
 
 const CenterContainer = styled.div`
   width: 100%;
   max-width: 760px;
   padding: 40px 0 80px 0;
+  margin: 0 auto;
 
   @media (max-width: 768px) {
     padding: 20px 16px 80px 16px;
   }
 `;
 
+const FullWidthContainer = styled.div`
+  width: 100%;
+  height: 100%;
+`;
+
 const FeedLayout = () => {
+  const location = useLocation();
+  const isChatPage = location.pathname.startsWith("/chat");
+
   return (
     <LayoutWrapper>
       <Header />
@@ -60,10 +65,17 @@ const FeedLayout = () => {
         <SidebarWrapper>
           <Sidebar />
         </SidebarWrapper>
+
         <BodyWrapper>
-          <CenterContainer>
-            <Outlet />
-          </CenterContainer>
+          {isChatPage ? (
+            <FullWidthContainer>
+              <Outlet />
+            </FullWidthContainer>
+          ) : (
+            <CenterContainer>
+              <Outlet />
+            </CenterContainer>
+          )}
         </BodyWrapper>
       </ContentWrapper>
     </LayoutWrapper>

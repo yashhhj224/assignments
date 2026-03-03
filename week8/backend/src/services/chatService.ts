@@ -163,45 +163,26 @@ export const sendMessageService = async(
         receiverUnreadCount + 1
     );
 
-    await conversation.save;
+    await conversation.save();
 
     const populatedMessage = await Message.findById(message._id)
-        .populate("sender", "-passwrd")
+        .populate("sender", "-password")
         .populate("receiver", "-password")
         .orFail();
 
     return populatedMessage;
 };
 
-export const getUserConversationsService = async(
-    currentUserId: string 
+export const getUserConversationsService = async (
+  currentUserId: string
 ) => {
-    const conversations = await Conversation.find({
-        participants: currentUserId,
-    })
-      .populate("participants", "-password")
-      .sort({ lastMessageAt: -1});
+  const conversations = await Conversation.find({
+    participants: currentUserId,
+  })
+    .populate("participants", "-password")
+    .sort({ lastMessageAt: -1 });
 
-    const formattedConversations = conversations.map((conversation) => {
-        const otherParticipant = conversation.participants.find(
-            (participant: any) => 
-                participant._id.toString() !== currentUserId
-        );
-
-        const unreadCount = conversation.unreadCounts.get(currentUserId) || 0;
-
-        return {
-            id: conversation._id,
-            chatUser: otherParticipant,
-            lastMessage: conversation.lastMessage || "",
-            lastMessageSender: conversation.lastMessageSender,
-            lastMessageAt: conversation.lastMessageAt,
-            unreadCount,
-            hasUnread: unreadCount > 0,
-        };
-    });
-
-    return formattedConversations;
+  return conversations;
 };
 
 export const getMessagesByConversationService = async(

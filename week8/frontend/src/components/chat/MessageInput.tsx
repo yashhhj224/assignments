@@ -2,31 +2,13 @@
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { sendMessage } from "../../redux/slices/chatSlice";
-import styled from "styled-components";
+import { IoSend } from "react-icons/io5";
 
-const Wrapper = styled.div`
-  display: flex;
-  padding: 12px;
-  border-top: 1px solid #e5e7eb;
-`;
+interface Props {
+  inputRef: React.RefObject<HTMLInputElement>;
+}
 
-const Input = styled.input`
-  flex: 1;
-  padding: 10px;
-  border-radius: 20px;
-  border: 1px solid #ddd;
-`;
-
-const Button = styled.button`
-  margin-left: 10px;
-  padding: 10px 16px;
-  border-radius: 20px;
-  background: #4338ca;
-  color: white;
-  border: none;
-`;
-
-const MessageInput = () => {
+const MessageInput = ({ inputRef }: Props) => {
   const [text, setText] = useState("");
   const dispatch = useAppDispatch();
   const { activeConversationId } =
@@ -46,14 +28,22 @@ const MessageInput = () => {
   };
 
   return (
-    <Wrapper>
-      <Input
+    <div className="bg-white border-t border-gray-200 px-6 py-4 flex items-center gap-4">
+      <input
+        ref={inputRef}
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Type a message..."
+        className="flex-1 bg-gray-100 rounded-full px-6 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary break-words"
       />
-      <Button onClick={handleSend}>Send</Button>
-    </Wrapper>
+
+      <button
+        onClick={handleSend}
+        className="bg-primary text-white p-3 rounded-full hover:opacity-90 transition flex items-center justify-center"
+      >
+        <IoSend size={18} />
+      </button>
+    </div>
   );
 };
 
