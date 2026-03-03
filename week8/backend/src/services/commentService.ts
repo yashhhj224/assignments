@@ -1,7 +1,6 @@
 
 import { Comment } from "../models/Comment";
 import { Post } from "../models/Post";
-import { User } from "../models/User";
 import { ApiError } from "../utils/ApiError";
 import { HTTP_STATUS } from "../constants/httpStatus";
 import { isValidMongoId, isNonEmptyString, normalizeText } from "../utils/validators";

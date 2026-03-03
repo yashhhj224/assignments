@@ -27,12 +27,10 @@ const ChatLayout = () => {
   return (
     <div className="h-full flex bg-white">
       
-      {/* Conversations */}
       <div className="w-[340px] border-r border-gray-200 flex flex-col bg-white">
         <ConversationList />
       </div>
 
-      {/* Chat Window */}
       <div className="flex-1 flex flex-col bg-gray-100">
         <ChatWindow />
       </div>

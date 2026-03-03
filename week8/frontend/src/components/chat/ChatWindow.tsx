@@ -53,7 +53,6 @@ const ChatWindow = () => {
   const isOnline =
     otherUser && onlineUsers.includes(otherUser._id);
 
-  // 🔥 UNREAD LOGIC
   const unreadCount =
   conversation?.unreadCounts?.[currentUser?._id || ""] || 0;
 
@@ -68,7 +67,6 @@ const shouldShowDivider =
 
   return (
     <>
-      {/* HEADER */}
       <div className="bg-white border-b border-gray-200 px-8 py-4">
         {otherUser && (
           <UserLink user={otherUser}>
@@ -89,7 +87,6 @@ const shouldShowDivider =
         )}
       </div>
 
-      {/* MESSAGES */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden px-12 py-8 space-y-3 chat-scroll">
        {conversationMessages.map((msg, index) => (
   <div key={msg._id}>
@@ -110,7 +107,6 @@ const shouldShowDivider =
         <div ref={bottomRef} />
       </div>
 
-      {/* INPUT */}
       <MessageInput inputRef={inputRef} />
     </>
   );

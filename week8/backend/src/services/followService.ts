@@ -6,7 +6,6 @@ import { isValidMongoId } from "../utils/validators";
 import { MESSAGES } from "../constants/messages";
 import { createNotificationService, getUnreadNotificationCountService } from "./notificationService";
 import { getIO } from "../socket"; 
-import { getUnreadConversationCountService } from "./chatService";
 
 export const followUserService = async (
   currentUserId: string,

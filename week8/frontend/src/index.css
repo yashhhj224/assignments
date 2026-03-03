@@ -7,15 +7,14 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Hide scrollbar but keep scroll */
 .hide-scrollbar::-webkit-scrollbar {
   width: 0px;
   height: 0px;
 }
 
 .hide-scrollbar {
-  -ms-overflow-style: none;  /* IE */
-  scrollbar-width: none;     /* Firefox */
+  -ms-overflow-style: none;  
+  scrollbar-width: none;    
 }
 
 .chat-scroll::-webkit-scrollbar {

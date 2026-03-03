@@ -12,7 +12,6 @@ import {
     getUnreadConversationCountService,
 } from "../services/chatService";
 import { getIO } from "../socket";
-import { Conversation } from "../models/Conversation";
 
 export const createOrGetConversationController = asyncHandler(
     async (req: Request, res: Response) => {

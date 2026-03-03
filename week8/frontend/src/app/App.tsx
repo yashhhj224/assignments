@@ -59,7 +59,6 @@ useEffect(() => {
     });
   });
 
-  // 🔥 ONLINE USERS LISTENER
   socket.on("online_users", (users: string[]) => {
     store.dispatch(setOnlineUsers(users));
   });

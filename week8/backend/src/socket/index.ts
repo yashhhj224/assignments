@@ -30,14 +30,12 @@ export const getIO = (): Server => {
 export const addOnlineUser = (userId: string, socketId: string) => {
   onlineUsers.set(userId, socketId);
 
-  // 🔥 BROADCAST FULL ONLINE LIST
   io.emit("online_users", Array.from(onlineUsers.keys()));
 };
 
 export const removeOnlineUser = (userId: string) => {
   onlineUsers.delete(userId);
 
-  // 🔥 BROADCAST UPDATED LIST
   io.emit("online_users", Array.from(onlineUsers.keys()));
 };
 

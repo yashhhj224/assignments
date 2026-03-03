@@ -36,7 +36,6 @@ const ConversationList = () => {
 
   return (
     <>
-      {/* Search */}
       <div className="h-[75px] px-5  flex items-center border-b border-gray-200 bg-white">
         <input
             value={search}
@@ -46,77 +45,78 @@ const ConversationList = () => {
         />
       </div>
 
-      {/* Conversations */}
       <div className="flex-1 overflow-y-auto hide-scrollbar">
-{filtered.map((conv) => {
-  const otherUser = conv.participants.find(
-    (p) => p._id !== currentUser?._id
-  );
-  if (!otherUser) return null;
+        {filtered.map((conv) => {
+          const otherUser = conv.participants.find(
+            (p) => p._id !== currentUser?._id
+          );
+          if (!otherUser) return null;
 
-  const isActive =
-    activeConversationId === conv._id;
+          const isActive =
+            activeConversationId === conv._id;
 
-  const isOnline = onlineUsers.includes(
-    otherUser._id
-  );
+          const isOnline = onlineUsers.includes(
+            otherUser._id
+          );
 
-const unreadCount =
-  conv.unreadCounts?.[currentUser?._id || ""] || 0;
+        const unreadCount =
+          conv.unreadCounts?.[currentUser?._id || ""] || 0;
 
 
-  const hasUnread = unreadCount > 0;
+        const hasUnread = unreadCount > 0;
 
-  return (
-    <div
-      key={conv._id}
-      onClick={() =>
-        dispatch(setActiveConversation(conv._id))
-      }
-     className={`flex items-center gap-4 px-6 py-5 cursor-pointer transition relative ${
-  isActive
-    ? "bg-primaryLight"
-    : unreadCount > 0
-    ? "bg-primaryLight/40"
-    : "hover:bg-gray-50"
-}`}
-    >
-      {/* Avatar */}
-      <div className="relative">
-        <Avatar
-          src={otherUser.profilePic}
-          size={42}
-        />
+        return (
+          <div
+            key={conv._id}
+            onClick={() =>
+              dispatch(
+                setActiveConversation({
+                  conversationId: conv._id,
+                  currentUserId: currentUser._id,
+                })
+              )
+            }
+          className={`flex items-center gap-4 px-6 py-5 cursor-pointer transition relative ${
+            isActive
+              ? "bg-primaryLight"
+              : unreadCount > 0
+              ? "bg-primaryLight/40"
+              : "hover:bg-gray-50"
+          }`}
+          >
+            <div className="relative">
+              <Avatar
+                src={otherUser.profilePic}
+                size={42}
+              />
 
-        {/* Online dot */}
-        {isOnline && (
-          <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
-        )}
-      </div>
+              {isOnline && (
+                <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
+              )}
+            </div>
 
-      <div className="flex-1 min-w-0">
-        <div className={`text-sm ${
-          hasUnread ? "font-semibold text-gray-900" : "text-gray-900"
-        }`}>
-          {otherUser.username}
-        </div>
+            <div className="flex-1 min-w-0">
+              <div className={`text-sm ${
+                hasUnread ? "font-semibold text-gray-900" : "text-gray-900"
+              }`}>
+                {otherUser.username}
+              </div>
 
-        <div className={`text-xs truncate mt-1 ${
-          hasUnread ? "font-semibold text-gray-800" : "text-gray-500"
-        }`}>
-          {conv.lastMessage && conv.lastMessage.trim() !== ""
-            ? conv.lastMessage
-            : "Start conversation"}
-        </div>
-      </div>
+              <div className={`text-xs truncate mt-1 ${
+                hasUnread ? "font-semibold text-gray-800" : "text-gray-500"
+              }`}>
+                {conv.lastMessage && conv.lastMessage.trim() !== ""
+                  ? conv.lastMessage
+                  : "Start conversation"}
+              </div>
+            </div>
 
-      {/* 🔵 Unread blue dot */}
-      {unreadCount > 0 && !isActive && (
-  <div className="absolute top-4 right-4 w-2 h-2 bg-primary rounded-full" />
-)}
-    </div>
-  );
-})}
+            {unreadCount > 0 && !isActive && (
+              <div className="absolute top-4 right-4 w-2 h-2 bg-primary rounded-full" />
+            )}
+          </div>
+          );
+        })}
       </div>
     </>
   );

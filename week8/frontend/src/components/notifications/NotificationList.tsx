@@ -43,7 +43,6 @@ const NotificationList = () => {
   return (
     <div className="max-w-2xl mx-auto">
 
-      {/* Tabs */}
       <div className="flex gap-6 border-b border-gray-200 text-sm font-medium mb-6">
         {tabs.map((tab) => (
           <button
@@ -55,7 +54,6 @@ const NotificationList = () => {
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
-            {tab.label}
             {activeTab === tab.value && (
               <div className="absolute left-0 right-0 -bottom-[1px] h-[2px] bg-primary rounded-full" />
             )}
@@ -63,7 +61,6 @@ const NotificationList = () => {
         ))}
       </div>
 
-      {/* Notifications */}
       <div className="divide-y divide-gray-100">
 
         {filteredNotifications.length === 0 && (
@@ -73,57 +70,52 @@ const NotificationList = () => {
         )}
 
         {filteredNotifications.map((n) => {
-  const dateObj = new Date(n.createdAt);
+          const dateObj = new Date(n.createdAt);
 
-  return (
-    <div
-      key={n._id}
-      onClick={() => handleClick(n)}
-      className={`flex items-start gap-3 py-4 px-2 cursor-pointer transition ${
-        !n.read
-          ? "bg-primaryLight"
-          : "hover:bg-gray-50"
-      }`}
-    >
-      {/* Avatar */}
-      <Avatar src={n.sender?.profilePic} size={36} />
+          return (
+            <div
+              key={n._id}
+              onClick={() => handleClick(n)}
+              className={`flex items-start gap-3 py-4 px-2 cursor-pointer transition ${
+                !n.read
+                  ? "bg-primaryLight"
+                  : "hover:bg-gray-50"
+              }`}
+            >
+              <Avatar src={n.sender?.profilePic} size={36} />
 
-      {/* Content */}
-      <div className="flex-1">
+              <div className="flex-1">
 
-        {/* Main Text */}
-        <div className="text-sm text-gray-800 leading-snug">
-          <span
-            className="font-semibold hover:underline"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/profile/${n.sender?._id}`);
-            }}
-          >
-            {n.sender?.username}
-          </span>{" "}
+                <div className="text-sm text-gray-800 leading-snug">
+                  <span
+                    className="font-semibold hover:underline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/profile/${n.sender?._id}`);
+                    }}
+                  >
+                    {n.sender?.username}
+                  </span>{" "}
 
-          {n.type === "FOLLOW" &&
-            "started following you."}
-          {n.type === "LIKE" &&
-            "liked your post."}
-          {n.type === "COMMENT" &&
-            "commented on your post."}
-        </div>
+                  {n.type === "FOLLOW" &&
+                    "started following you."}
+                  {n.type === "LIKE" &&
+                    "liked your post."}
+                  {n.type === "COMMENT" &&
+                    "commented on your post."}
+                </div>
+                <div className="text-xs text-gray-400 mt-1">
+                  {dateObj.toLocaleDateString()} | {" "}
+                  {dateObj.toLocaleTimeString()}
+                </div>
+              </div>
 
-        {/* Timestamp */}
-        <div className="text-xs text-gray-400 mt-1">
-          {dateObj.toLocaleDateString()} | {" "}
-          {dateObj.toLocaleTimeString()}
-        </div>
-      </div>
-
-      {!n.read && (
-        <div className="w-2 h-2 bg-primary rounded-full mt-2" />
-      )}
-    </div>
-  )
-})}
+              {!n.read && (
+                <div className="w-2 h-2 bg-primary rounded-full mt-2" />
+              )}
+            </div>
+          )
+        })}
       </div>
     </div>
   );

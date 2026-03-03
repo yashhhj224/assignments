@@ -87,20 +87,24 @@ const chatSlice = createSlice({
   name: "chat",
   initialState,
   reducers: {
-setActiveConversation(state, action) {
-  state.activeConversationId = action.payload;
+    setActiveConversation(
+      state,
+      action: {
+        payload: { conversationId: string; currentUserId: string };
+      }
+    ) {
+      const { conversationId, currentUserId } = action.payload;
 
-  const conv = state.conversations.find(
-    c => c._id === action.payload
-  );
+      state.activeConversationId = conversationId;
 
-  if (conv && conv.unreadCounts) {
-    const userId = action.meta?.currentUserId;
-    if (userId) {
-      conv.unreadCounts[userId] = 0;
-    }
-  }
-},
+      const conv = state.conversations.find(
+        (c) => c._id === conversationId
+      );
+
+      if (conv?.unreadCounts && currentUserId) {
+        conv.unreadCounts[currentUserId] = 0;
+      }
+    },
 
     receiveMessage(state, action) {
       const message: Message = action.payload;
@@ -118,20 +122,20 @@ setActiveConversation(state, action) {
         state.messages[convId].push(message);
       }
 
-const index = state.conversations.findIndex(
-  (c) => c._id === convId
-);
+      const index = state.conversations.findIndex(
+        (c) => c._id === convId
+      );
 
-if (index !== -1) {
-  const updatedConv = {
-    ...state.conversations[index],
-    lastMessage: message.content,
-    lastMessageAt: message.createdAt,
-  };
+      if (index !== -1) {
+        const updatedConv = {
+          ...state.conversations[index],
+          lastMessage: message.content,
+          lastMessageAt: message.createdAt,
+        };
 
-  state.conversations.splice(index, 1);
-  state.conversations.unshift(updatedConv);
-}
+        state.conversations.splice(index, 1);
+        state.conversations.unshift(updatedConv);
+      }
     },
 
     addConversation(state, action) {
@@ -164,40 +168,38 @@ if (index !== -1) {
       })
 
       .addCase(sendMessage.fulfilled, (state, action) => {
-  const message: Message = action.payload;
-  const convId = message.conversationId;
+        const message: Message = action.payload;
+        const convId = message.conversationId;
 
-  if (!state.messages[convId]) {
-    state.messages[convId] = [];
-  }
+        if (!state.messages[convId]) {
+          state.messages[convId] = [];
+        }
 
-  // Prevent duplicate
-  const exists = state.messages[convId].some(
-    (m) => m._id === message._id
-  );
+        const exists = state.messages[convId].some(
+          (m) => m._id === message._id
+        );
 
-  if (!exists) {
-    state.messages[convId].push(message);
-  }
+        if (!exists) {
+          state.messages[convId].push(message);
+        }
 
-  const index = state.conversations.findIndex(
-    (c) => c._id === convId
-  );
+        const index = state.conversations.findIndex(
+          (c) => c._id === convId
+        );
 
-  if (index !== -1) {
-    const updatedConv = {
-      ...state.conversations[index],
-      lastMessage: message.content,
-      lastMessageAt: message.createdAt,
-    };
+        if (index !== -1) {
+          const updatedConv = {
+            ...state.conversations[index],
+            lastMessage: message.content,
+            lastMessageAt: message.createdAt,
+          };
 
-    // Remove old position
-    state.conversations.splice(index, 1);
+          state.conversations.splice(index, 1);
 
-    // Move to top
-    state.conversations.unshift(updatedConv);
-  }
-});
+          state.conversations.unshift(updatedConv);
+        }
+      }
+    );
   },
 });
 

@@ -75,9 +75,6 @@ const followSlice = createSlice({
         state.following = action.payload;
       })
 
-      .addCase(followUser.fulfilled, (state, action) => {
-      })
-
       .addCase(unfollowUser.fulfilled, (state, action) => {
         state.following = state.following.filter(
           (u) => u._id !== action.payload
