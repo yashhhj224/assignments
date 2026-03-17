@@ -19,16 +19,26 @@ import ChatPage from "../pages/ChatPage";
 import { initializeSocket } from "../socket";
 import { store } from "./store";
 import { setOnlineUsers } from "../redux/slices/chatSlice";
+import { fetchMyFollowing } from "../redux/slices/followSlice";
+import { setCurrentUserId } from "../redux/slices/chatSlice";
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  const { token } = useAppSelector((state) => state.auth);
+  const { token, isHydrated } = useAppSelector((state) => state.auth);
+
+  if (!isHydrated) return null;  
+
   if (!token) return <Navigate to="/login" replace />;
+
   return children;
 };
 
 const PublicRoute = ({ children }: { children: JSX.Element }) => {
-  const { token } = useAppSelector((state) => state.auth);
+  const { token, isHydrated } = useAppSelector((state) => state.auth);
+
+  if (!isHydrated) return null;
+
   if (token) return <Navigate to="/home" replace />;
+
   return children;
 };
 
@@ -36,39 +46,47 @@ const App = () => {
   const dispatch = useAppDispatch();
   const { token } = useAppSelector((state) => state.auth);
 
+  const { user } = useAppSelector((state) => state.auth);
+  
   useEffect(() => {
     dispatch(loadUserFromStorage());
   }, [dispatch]);
 
-useEffect(() => {
-  if (!token) return;
+  useEffect(() => {
+    if (user?._id) {
+      dispatch(setCurrentUserId(user._id));
+    }
+  }, [user?._id, dispatch]);
+  useEffect(() => {
+    if (!token) return;
 
-  const socket = initializeSocket(token);
+    dispatch(fetchMyFollowing());
+    const socket = initializeSocket(token);
 
-  socket.on("new_notification", (notification) => {
-    store.dispatch({
-      type: "notifications/addNotification",
-      payload: notification,
+    socket.on("new_notification", (notification) => {
+      store.dispatch({
+        type: "notifications/addNotification",
+        payload: notification,
+      });
     });
-  });
 
-  socket.on("notification_unread_updated", (data) => {
-    store.dispatch({
-      type: "notifications/setUnreadCount",
-      payload: data.unreadNotificationCount,
+    socket.on("notification_unread_updated", (data) => {
+      store.dispatch({
+        type: "notifications/setUnreadCount",
+        payload: data.unreadNotificationCount,
+      });
     });
-  });
 
-  socket.on("online_users", (users: string[]) => {
-    store.dispatch(setOnlineUsers(users));
-  });
+    socket.on("online_users", (users: string[]) => {
+      store.dispatch(setOnlineUsers(users));
+    });
 
-  return () => {
-    socket.off("new_notification");
-    socket.off("notification_unread_updated");
-    socket.off("online_users");
-  };
-}, [token]);
+    return () => {
+      socket.off("new_notification");
+      socket.off("notification_unread_updated");
+      socket.off("online_users");
+    };
+  }, [token, dispatch]);
 
   return (
     <Routes>

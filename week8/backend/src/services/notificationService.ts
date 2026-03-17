@@ -23,21 +23,26 @@ export const createNotificationService = async(
 };
 
 export const getNotificationsService = async (
-    userId: String,
-    page: number = 1,
-    limit: number = 20
+  userId: string,
+  page: number = 1,
+  limit: number = 20
 ) => {
-    const safeLimit = limit < 1 ? 20 : limit > 50 ? 50 : limit;
+  const safeLimit = limit < 1 ? 20 : limit > 50 ? 50 : limit;
 
-    const notifications = await Notification.find({
-        user: userId,
-    })
-      .populate("sender", "-password")
-      .populate("postId")
-      .sort({ createdAt: -1})
-      .limit(safeLimit);
+  const safePage = page < 1 ? 1 : page;
 
-    return notifications;
+  const skip = (safePage - 1) * safeLimit;
+
+  const notifications = await Notification.find({
+    user: userId,
+  })
+    .populate("sender", "-password")
+    .populate("postId")
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(safeLimit);
+
+  return notifications;
 };
 
 export const markAllNotificationsReadService = async(

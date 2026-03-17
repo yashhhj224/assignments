@@ -14,6 +14,7 @@ import { HTTP_STATUS } from "./constants/httpStatus";
 import { MESSAGES } from "./constants/messages";
 import chatRoutes from "./routes/chatRoutes";
 import notificationRoutes from "./routes/notificationRoutes";
+import groupChatRoutes from "./routes/groupChatRoutes";
 
 const app = express();
 
@@ -25,7 +26,7 @@ app.use(
   })
 );
 
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
 
 const uploadsPath = path.join(__dirname, "..", "uploads");
 
@@ -39,6 +40,7 @@ app.use("/api", likeRoutes);
 app.use("/api", commentRoutes);
 app.use("/api", uploadRoutes);
 app.use("/api", chatRoutes);
+app.use("/api", groupChatRoutes);
 app.use("/api", notificationRoutes);
 
 app.use((req, res) => {

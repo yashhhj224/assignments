@@ -34,61 +34,28 @@ export const createOrGetConversationController = asyncHandler(
 
 export const sendMessageController = asyncHandler(
     async (req: Request, res: Response) => {
-        const currentUserId = req.userId as string;
-        const { conversationId, content } = req.body;
 
-        const { canSendMessage } = await import("../socket");
+    const currentUserId = req.userId as string;
 
-        if (!canSendMessage(currentUserId)) {
-            return res.status(429).json({
-                success: false,
-                message: "Too many messages. Please slow down."
-            });
-        }
+    const { conversationId, content } = req.body;
 
-        const message = await sendMessageService(
-            currentUserId,
-            conversationId,
-            content
-        );
+    const file = req.file;
 
-        const io = getIO();
+    const message = await sendMessageService(
+        currentUserId,
+        conversationId,
+        content,
+        file
+    );
 
-        const receiverId = (message.receiver as any)._id.toString();
+    successResponse(
+    res,
+    HTTP_STATUS.CREATED,
+    "Message sent successfully",
+    message
+    );
 
-        const { isUserOnline } = await import("../socket");
-
-        if (isUserOnline(receiverId)) {
-            message.delivered = true;
-            await message.save();
-        }
-
-        io.to(receiverId).emit("new_message", message);
-
-        io.to(receiverId).emit("conversation_updated", {
-            conversationId,
-        });
-
-        io.to(currentUserId).emit("conversation_updated", {
-            conversationId,
-        });
-
-        const unreadData = 
-            await getUnreadConversationCountService(receiverId);
-
-        io.to(receiverId).emit(
-            "unread_count_updated",
-            unreadData
-        );
-
-        successResponse(
-            res,
-            HTTP_STATUS.CREATED,
-            "Message sent successfully",
-            message
-        );
-    }
-);
+});
 
 export const getUserConversationsController = asyncHandler(
     async(req: Request, res: Response) => {

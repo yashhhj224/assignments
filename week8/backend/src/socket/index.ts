@@ -3,7 +3,7 @@ import { Server } from "socket.io";
 
 let io: Server;
 
-const onlineUsers = new Map<string, string>();
+const onlineUsers = new Map<string, Set<string>>();
 const messageRateMap = new Map<string, number[]>();
 
 const MESSAGE_LIMIT = 10;
@@ -28,13 +28,25 @@ export const getIO = (): Server => {
 };
 
 export const addOnlineUser = (userId: string, socketId: string) => {
-  onlineUsers.set(userId, socketId);
+  if (!onlineUsers.has(userId)) {
+    onlineUsers.set(userId, new Set());
+  }
+
+  onlineUsers.get(userId)?.add(socketId);
 
   io.emit("online_users", Array.from(onlineUsers.keys()));
 };
 
-export const removeOnlineUser = (userId: string) => {
-  onlineUsers.delete(userId);
+export const removeOnlineUser = (userId: string, socketId: string) => {
+  const sockets = onlineUsers.get(userId);
+
+  if (sockets) {
+    sockets.delete(socketId);
+
+    if (sockets.size === 0) {
+      onlineUsers.delete(userId);
+    }
+  }
 
   io.emit("online_users", Array.from(onlineUsers.keys()));
 };

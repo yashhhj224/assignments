@@ -17,24 +17,25 @@ type AuthState = {
   token: string | null;
   isLoading: boolean;
   error: string | null;
+  isHydrated: boolean;
 };
 
 const initialState: AuthState = {
   user: null,
   token: localStorage.getItem("token"),
   isLoading: false,
-  error: null
+  error: null,
+  isHydrated: false,
 };
 
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (
     payload: { email: string; password: string },
-    { dispatch, rejectWithValue }
+    { rejectWithValue }
   ) => {
     try {
       const data = await loginApi(payload);
-      dispatch(fetchMyFollowing());
       return data;
     } catch (error: any) {
       return rejectWithValue(error.message || "Invalid email or password");
@@ -71,7 +72,7 @@ export const updateProfile = createAsyncThunk(
 
 export const loadUserFromStorage = createAsyncThunk(
   "auth/loadUser",
-  async (_, { dispatch }) => {
+  async (_, {}) => {
     const token = localStorage.getItem("token");
     if (!token) return null;
 
@@ -82,9 +83,6 @@ export const loadUserFromStorage = createAsyncThunk(
     });
 
     const data = await res.json();
-
-    dispatch(fetchMyFollowing());
-
     return { user: data.data, token };
   }
 );
@@ -115,11 +113,19 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
+
         const token = action.payload.token;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
-        localStorage.setItem("token", action.payload.token);
-        initializeSocket(token);
+        const userFromLogin = action.payload.user;
+
+        state.user = {
+          ...userFromLogin,
+          _id: userFromLogin._id || userFromLogin.id,
+        };
+
+        state.token = token;
+        state.isHydrated = true;
+
+        localStorage.setItem("token", token);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -139,11 +145,15 @@ const authSlice = createSlice({
       })
 
       .addCase(loadUserFromStorage.fulfilled, (state, action) => {
+        state.isHydrated = true; 
         if (action.payload) {
           state.user = action.payload.user;
           state.token = action.payload.token;
           initializeSocket(action.payload.token);
         }
+      })
+      .addCase(loadUserFromStorage.rejected, (state) => {
+        state.isHydrated = true;
       })
 
       .addCase(followUser.fulfilled, (state) => {

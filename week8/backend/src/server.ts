@@ -52,7 +52,7 @@ const startServer = async () => {
     });
 
 io.on("connection", (socket) => {
-  const userId = socket.data.userId;
+  const userId: string = socket.data.userId;
 
   console.log(`User connected: ${userId}`);
 
@@ -73,7 +73,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", async () => {
-    removeOnlineUser(userId);
+    removeOnlineUser(userId, socket.id);
 
     await User.findByIdAndUpdate(userId, {
       lastSeen: new Date(),
@@ -83,7 +83,7 @@ io.on("connection", (socket) => {
   });
 });
 
-    httpServer.listen(ENV.PORT, () => {
+  httpServer.listen(ENV.PORT, () => {
       console.log(`Server running on port ${ENV.PORT}`);
     });
   } catch (error) {

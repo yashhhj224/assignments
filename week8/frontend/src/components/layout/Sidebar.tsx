@@ -1,6 +1,6 @@
 
 import styled from "styled-components";
-import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useAppSelector } from "../../redux/hooks";
 import { FiHome, FiUsers, FiUser, FiPlusSquare, FiBell, FiMessageCircle } from "react-icons/fi";
 import { useEffect } from "react";
@@ -8,8 +8,7 @@ import { useAppDispatch } from "../../redux/hooks";
 import { fetchUnreadNotificationCount } from "../../redux/slices/notificationSlice";
 
 const Wrapper = styled.div`
-  position: sticky;
-  top: 70px;
+  height: calc(100vh - 70px);
   padding: 24px 18px;
   display: flex;
   flex-direction: column;
@@ -40,24 +39,6 @@ const MenuItem = styled(NavLink)`
     background: #ede9fe;
     color: #4338ca;
     font-weight: 600;
-  }
-`;
-
-const ButtonItem = styled.div<{ $active?: boolean }>`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: ${({ $active }) => ($active ? 600 : 500)};
-  color: ${({ $active }) => ($active ? "#4338ca" : "#374151")};
-  background: ${({ $active }) =>
-    $active ? "#ede9fe" : "transparent"};
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: #f3f4f6;
   }
 `;
 
@@ -98,25 +79,37 @@ const NotificationCount = styled.span`
 `;
 
 const Sidebar = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
+
+  const { conversations, messages, currentUserId } = useAppSelector(
+    (state) => state.chat
+  );
+
+  const unreadConversationCount = conversations.filter((conv) => {
+    const lastReadId = conv.lastReadMessageIds?.[currentUserId ?? ""];
+
+    const convMsgs = messages?.[conv._id] ?? [];
+
+    if (!lastReadId) return false;
+
+    const lastReadMsg = convMsgs.find((m) => m._id === lastReadId);
+    if (!lastReadMsg) return false;
+
+    const hasUnread = convMsgs.some(
+      (m) =>
+        new Date(m.createdAt) > new Date(lastReadMsg.createdAt) &&
+        m.receiver._id === currentUserId
+    );
+
+    return hasUnread;
+  }).length;
 
   useEffect(() => {
     if (user?._id) {
       dispatch(fetchUnreadNotificationCount());
     }
   }, [user?._id, dispatch]);
-
-  const handleProfileClick = () => {
-    if (user?._id) {
-      navigate(`/profile/${user._id}`);
-    }
-  };
-
-  const isProfileActive =
-    location.pathname.startsWith("/profile");
 
   const unreadCount = useAppSelector(
     (state) => state.notifications.unreadCount
@@ -134,17 +127,21 @@ const Sidebar = () => {
           Users
         </MenuItem>
 
-        <ButtonItem
-          onClick={handleProfileClick}
-          $active={isProfileActive}
-        >
-          <FiUser />
-          Profile
-        </ButtonItem>
+        {user?._id && (
+          <MenuItem to={`/profile/${user._id}`}>
+            <FiUser />
+            Profile
+          </MenuItem>
+        )}
 
         <MenuItem to="/chat">
           <FiMessageCircle />
           Messages
+          {unreadConversationCount > 0 && (
+            <NotificationCount>
+              {unreadConversationCount}
+            </NotificationCount>
+          )}
         </MenuItem>
 
         <MenuItem to="/notifications">

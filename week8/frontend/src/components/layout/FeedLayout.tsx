@@ -7,7 +7,7 @@ import Sidebar from "./Sidebar";
 const LayoutWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
   background: #f3f4f6;
 `;
 
@@ -24,17 +24,21 @@ const SidebarWrapper = styled.div`
   width: 260px;
   background: white;
   border-right: 1px solid #e5e7eb;
+  height: calc(100vh - 70px);
+  flex-shrink: 0;
 
   @media (max-width: 1024px) {
     width: 100%;
     border-right: none;
     border-bottom: 1px solid #e5e7eb;
+    height: auto;
   }
 `;
 
 const BodyWrapper = styled.div`
   flex: 1;
   display: flex;
+  overflow-y: auto;
   height: calc(100vh - 70px);
 `;
 

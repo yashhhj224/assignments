@@ -16,7 +16,8 @@ import { MESSAGES } from "../constants/messages";
 
 export const createPostService = async (
   userId: string,
-  payload: any
+  payload: any,
+  files?: Express.Multer.File[]
 ) => {
   if (!payload) {
     throw new ApiError(
@@ -43,18 +44,32 @@ export const createPostService = async (
   const content = normalizeText(payload.content);
   const tags = normalizeTags(payload.tags);
 
-  const images = Array.isArray(payload.images)
-    ? payload.images.map((img: string) => {
-        let path = normalizeText(img).trim();
+  let media: { type: "IMAGE" | "VIDEO"; url: string }[] = [];
 
-        if (!path.startsWith("/uploads/")) {
-          path = path.replace(/^\/?uploads\/?/, "");
-          path = `/uploads/${path}`;
-        }
+  if (files && files.length > 0) {
+    media = files.map((file) => {
+      const mime = file.mimetype;
 
-        return path.toLowerCase();
-      })
-    : [];
+      if (mime.startsWith("image/")) {
+        return {
+          type: "IMAGE",
+          url: `/uploads/${file.filename}`
+        };
+      }
+
+      if (mime.startsWith("video/")) {
+        return {
+          type: "VIDEO",
+          url: `/uploads/${file.filename}`
+        };
+      }
+
+      throw new ApiError(
+        "Unsupported media type",
+        HTTP_STATUS.BAD_REQUEST
+      );
+    });
+  }
 
   if (title.length < VALIDATION_RULES.POST_TITLE_MIN_LENGTH) {
     throw new ApiError(
@@ -74,7 +89,7 @@ export const createPostService = async (
     author: userId,
     title,
     content,
-    images,
+    media,
     tags
   });
 
@@ -153,19 +168,6 @@ export const updatePostService = async (
     }
 
     post.content = content;
-  }
-
-  if (payload.images !== undefined) {
-    if (!Array.isArray(payload.images)) {
-      throw new ApiError(
-        MESSAGES.ERROR.IMAGES_MUST_BE_ARRAY,
-        HTTP_STATUS.BAD_REQUEST
-      );
-    }
-
-    post.images = payload.images.map((img: string) =>
-      normalizeText(img)
-    );
   }
 
   if (payload.tags !== undefined) {

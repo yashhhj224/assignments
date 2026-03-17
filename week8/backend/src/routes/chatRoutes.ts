@@ -9,6 +9,7 @@ import {
   markConversationAsSeenController,
   getUnreadConversationCountController,
 } from "../controllers/chatController";
+import { upload } from "../config/multer";
 
 const router = Router();
 
@@ -33,6 +34,7 @@ router.get(
 router.post(
     "/chat/messages",
     authMiddleware,
+    upload.single("media"),
     sendMessageController
 );
 

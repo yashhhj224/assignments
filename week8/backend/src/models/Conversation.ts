@@ -1,14 +1,24 @@
 
 import { Schema, model, Document, Types } from "mongoose";
 
+export type ConversationType = "DIRECT" | "GROUP";
+
 export interface IConversation extends Document {
-  participants: Types.ObjectId[]; 
-  conversationKey: string;
+  participants: Types.ObjectId[];
+  
+  type: ConversationType;
+
+  groupName?: string;
+  groupAdmin?: Types.ObjectId;
+  groupAvatar?: string;
+
+  conversationKey?: string;
+
   lastMessage?: string;
   lastMessageSender?: Types.ObjectId;
   lastMessageAt?: Date;
 
-  unreadCounts: Map<string, number>;
+  unreadBy: Types.ObjectId[];
 
   createdAt: Date;
   updatedAt: Date;
@@ -23,12 +33,34 @@ const conversationSchema = new Schema<IConversation>(
         required: true,
       },
     ],
+
+    type: {
+      type: String,
+      enum: ["DIRECT", "GROUP"],
+      default: "DIRECT"
+    },
+
+    groupName: {
+      type: String,
+      trim: true
+    },
+
+    groupAvatar: {
+      type: String
+    },
+
+    groupAdmin: {
+      type: Schema.Types.ObjectId,
+      ref: "User"
+    },
+
     conversationKey: {
       type: String,
-      required: true,
       unique: true,
+      sparse: true,
       index: true,
     },
+
     lastMessage: {
       type: String,
       trim: true,
@@ -40,22 +72,37 @@ const conversationSchema = new Schema<IConversation>(
     lastMessageAt: {
       type: Date,
     },
-    unreadCounts: {
-      type: Map,
-      of: Number,
-      default: {},
-    },
+    unreadBy: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      }
+    ],
   },
   { timestamps: true }
 );
 
 conversationSchema.pre<IConversation>("validate", function () {
-  if (this.participants.length !== 2) {
-    throw new Error("Conversation must have exactly 2 participants");
+
+  if (this.type === "DIRECT") {
+    if (!this.participants || this.participants.length !== 2) {
+      throw new Error("Direct conversation must have exactly 2 participants");
+    }
   }
+
+  if (this.type === "GROUP") {
+    if (!this.groupName) {
+      throw new Error("Group must have name");
+    }
+
+    if (!this.groupAdmin) {
+      throw new Error("Group must have admin");
+    }
+  }
+
 });
 
-conversationSchema.index({ participants: 1 });
+conversationSchema.index({ lastMessageAt: -1 });
 
 export const Conversation = model<IConversation>(
   "Conversation",

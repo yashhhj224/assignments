@@ -1,14 +1,21 @@
 
 import ConversationList from "./ConversationList";
 import ChatWindow from "./ChatWindow";
-import { useAppDispatch } from "../../redux/hooks";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { useEffect } from "react";
 import { getSocket } from "../../socket";
-import { receiveMessage } from "../../redux/slices/chatSlice";
+import { receiveMessage, setCurrentUserId } from "../../redux/slices/chatSlice";
 
 const ChatLayout = () => {
   const dispatch = useAppDispatch();
+  const currentUser = useAppSelector((state) => state.auth.user);
 
+  useEffect(() => {
+    if (currentUser?._id) {
+      dispatch(setCurrentUserId(currentUser._id));
+    }
+  }, [currentUser, dispatch]);
+  
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;

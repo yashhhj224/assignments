@@ -16,7 +16,13 @@ export const uploadImagesController = asyncHandler(
       throw new ApiError(MESSAGES.UPLOAD.NO_FILES, HTTP_STATUS.BAD_REQUEST);
     }
 
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    const allowedTypes = [
+      "image/jpeg", 
+      "image/png", 
+      "image/webp",
+      "video/mp4",
+      "video/webm"
+    ];
 
     try {
       for (const file of files) {

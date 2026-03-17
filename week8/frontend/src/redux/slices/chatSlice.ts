@@ -33,6 +33,7 @@ export interface Conversation {
   }[];
   lastMessage?: string;
   lastMessageAt?: string;
+  lastReadMessageIds?: Record<string, string>;
   unreadCounts?: Record<string, number>;
 }
 
@@ -73,7 +74,8 @@ interface ChatState {
   conversations: Conversation[];
   messages: Record<string, Message[]>;
   activeConversationId: string | null;
-  onlineUsers: string[]; 
+  onlineUsers: string[];
+  currentUserId: string | null;
 }
 
 const initialState: ChatState = {
@@ -81,29 +83,20 @@ const initialState: ChatState = {
   messages: {},
   activeConversationId: null,
   onlineUsers: [],
+  currentUserId: null,
 };
 
 const chatSlice = createSlice({
   name: "chat",
   initialState,
   reducers: {
-    setActiveConversation(
-      state,
-      action: {
-        payload: { conversationId: string; currentUserId: string };
-      }
-    ) {
-      const { conversationId, currentUserId } = action.payload;
-
+    setActiveConversation(state, action) {
+      const { conversationId } = action.payload;
       state.activeConversationId = conversationId;
+    },
 
-      const conv = state.conversations.find(
-        (c) => c._id === conversationId
-      );
-
-      if (conv?.unreadCounts && currentUserId) {
-        conv.unreadCounts[currentUserId] = 0;
-      }
+    setCurrentUserId(state, action) {
+      state.currentUserId = action.payload;
     },
 
     receiveMessage(state, action) {
@@ -114,11 +107,11 @@ const chatSlice = createSlice({
         state.messages[convId] = [];
       }
 
-      const alreadyExists = state.messages[convId].some(
+      const exists = state.messages[convId].some(
         (m) => m._id === message._id
       );
 
-      if (!alreadyExists) {
+      if (!exists) {
         state.messages[convId].push(message);
       }
 
@@ -126,16 +119,35 @@ const chatSlice = createSlice({
         (c) => c._id === convId
       );
 
-      if (index !== -1) {
-        const updatedConv = {
-          ...state.conversations[index],
-          lastMessage: message.content,
-          lastMessageAt: message.createdAt,
-        };
+      if (index === -1) return;
 
-        state.conversations.splice(index, 1);
-        state.conversations.unshift(updatedConv);
+      const conv = state.conversations[index];
+
+      if (!conv.lastReadMessageIds) {
+        conv.lastReadMessageIds = {};
       }
+
+      const currentUserId = state.currentUserId;
+
+      const isIncoming =
+        currentUserId &&
+        message.receiver?._id === currentUserId;
+
+      const isChatOpen =
+        state.activeConversationId === convId;
+
+      if (isIncoming && isChatOpen) {
+        conv.lastReadMessageIds[currentUserId] = message._id;
+      }
+
+      const updatedConv = {
+        ...conv,
+        lastMessage: message.content,
+        lastMessageAt: message.createdAt,
+      };
+
+      state.conversations.splice(index, 1);
+      state.conversations.unshift(updatedConv);
     },
 
     addConversation(state, action) {
@@ -151,9 +163,8 @@ const chatSlice = createSlice({
     },
 
     setOnlineUsers(state, action) {
-        state.onlineUsers = action.payload;
+      state.onlineUsers = action.payload;
     },
-
   },
 
   extraReducers: (builder) => {
@@ -163,8 +174,29 @@ const chatSlice = createSlice({
       })
 
       .addCase(fetchMessages.fulfilled, (state, action) => {
-        state.messages[action.payload.conversationId] =
-          action.payload.messages || [];
+        const { conversationId, messages } = action.payload;
+
+        state.messages[conversationId] = messages || [];
+
+        const conv = state.conversations.find(
+          (c) => c._id === conversationId
+        );
+
+        if (
+          conv &&
+          state.currentUserId &&
+          messages.length > 0 &&
+          state.activeConversationId === conversationId
+        ) {
+          const lastMessage = messages[messages.length - 1];
+
+          if (!conv.lastReadMessageIds) {
+            conv.lastReadMessageIds = {};
+          }
+
+          conv.lastReadMessageIds[state.currentUserId] =
+            lastMessage._id;
+        }
       })
 
       .addCase(sendMessage.fulfilled, (state, action) => {
@@ -195,19 +227,21 @@ const chatSlice = createSlice({
           };
 
           state.conversations.splice(index, 1);
-
           state.conversations.unshift(updatedConv);
         }
-      }
-    );
+      });
   },
 });
 
 export const {
   setActiveConversation,
+  setCurrentUserId,
   receiveMessage,
   addConversation,
-  setOnlineUsers
+  setOnlineUsers,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;
+
+
+

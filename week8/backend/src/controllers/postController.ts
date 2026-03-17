@@ -37,7 +37,9 @@ export const createPostController = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.userId as string;
 
-    const post = await createPostService(userId, req.body);
+    const files = req.files as Express.Multer.File[] | undefined;
+
+    const post = await createPostService(userId, req.body, files);
 
     successResponse(res, HTTP_STATUS.CREATED, MESSAGES.POST.POST_CREATED, post);
   }

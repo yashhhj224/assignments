@@ -5,32 +5,32 @@ import { HTTP_STATUS } from "../constants/httpStatus";
 import { isValidMongoId } from "../utils/validators";
 import { MESSAGES } from "../constants/messages";
 import { createNotificationService, getUnreadNotificationCountService } from "./notificationService";
-import { getIO } from "../socket"; 
+import { getIO } from "../socket/index"; 
+import { emitNotification } from "../socket/notificationEmitter";
 
 export const followUserService = async (
   currentUserId: string,
   targetUserId: string
 ) => {
   if (currentUserId === targetUserId) {
-    throw new Error("You cannot follow yourself");
+    throw new ApiError(
+      MESSAGES.ERROR.YOU_CANNOT_FOLLOW_YOURSELF,
+      HTTP_STATUS.BAD_REQUEST
+    );
   }
 
   const currentUser = await User.findById(currentUserId);
   const targetUser = await User.findById(targetUserId);
 
   if (!currentUser || !targetUser) {
-    throw new Error("User not found");
+    throw new ApiError(
+      MESSAGES.ERROR.USER_NOT_FOUND,
+      HTTP_STATUS.NOT_FOUND
+    );
   }
 
   if (currentUser.following.includes(targetUser._id)) {
     return;
-  }
-
-  if (currentUserId === targetUserId) {
-    throw new ApiError(
-      "You cannot follow yourself",
-      HTTP_STATUS.BAD_REQUEST
-    );
   }
   
   currentUser.following.push(targetUser._id);
@@ -46,17 +46,7 @@ export const followUserService = async (
   );
 
   if (notification) {
-    const io = getIO();
-
-    io.to(targetUserId).emit("new_notification", notification);
-
-    const unreadData = 
-      await getUnreadNotificationCountService(targetUserId);
-    
-    io.to(targetUserId).emit(
-      "notification_unread_updated",
-      unreadData
-    );
+    await emitNotification(targetUserId, notification);
   }
 };
 
@@ -68,7 +58,10 @@ export const unfollowUserService = async (
   const targetUser = await User.findById(targetUserId);
 
   if (!currentUser || !targetUser) {
-    throw new Error("User not found");
+  throw new ApiError(
+    MESSAGES.ERROR.USER_NOT_FOUND,
+    HTTP_STATUS.NOT_FOUND
+  );
   }
 
   currentUser.following = currentUser.following.filter(

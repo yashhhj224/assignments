@@ -1,4 +1,5 @@
 
+
 import mongoose from "mongoose";
 import { Conversation } from "../models/Conversation";
 import { User } from "../models/User";
@@ -8,6 +9,7 @@ import { isValidMongoId } from "../utils/validators";
 import { MESSAGES } from "../constants/messages";
 import { Message } from "../models/Message";
 import { isNonEmptyString, normalizeText } from "../utils/validators";
+import { getIO, isUserOnline, canSendMessage } from "../socket/index";
 
 const generateConversationKey = (
     userId1: string,
@@ -62,10 +64,7 @@ export const createOrGetConversationService = async (
             new mongoose.Types.ObjectId(targetUserId)
         ],
         conversationKey,
-        unreadCounts: {
-            [currentUserId]: 0,
-            [targetUserId]: 0
-        }
+        unreadBy: []
     });
 
     const populatedConversation = await Conversation.findById(
@@ -75,11 +74,19 @@ export const createOrGetConversationService = async (
     return populatedConversation;
 };
 
-export const sendMessageService = async(
-    currentUserId: string,
-    conversationId: string,
-    content: string
+export const sendMessageService = async (
+    currentUserId:string,
+    conversationId:string,
+    content?:string,
+    file?: Express.Multer.File
 ) => {
+
+    if (!canSendMessage(currentUserId)) {
+        throw new ApiError(
+            "Too many messages. Please slow down.",
+            HTTP_STATUS.BAD_REQUEST
+        );
+    }
     if (!isValidMongoId(conversationId)) {
         throw new ApiError(
             "Invalid conversation id",
@@ -87,7 +94,7 @@ export const sendMessageService = async(
         );
     }
 
-    if (!isNonEmptyString(content)) {
+    if (content && !isNonEmptyString(content)) {
         throw new ApiError(
             "Message content cannot be empty",
             HTTP_STATUS.BAD_REQUEST
@@ -114,18 +121,22 @@ export const sendMessageService = async(
         );
     }
 
-    const receiverId = conversation.participants.find(
-        (participantId) => participantId.toString() !== currentUserId
+    let receiverId: mongoose.Types.ObjectId | undefined;
+
+    if (conversation.type === "DIRECT") {
+    receiverId = conversation.participants.find(
+        (p) => p.toString() !== currentUserId
     );
 
     if (!receiverId) {
         throw new ApiError(
-            "Invalid conversation participants",
-            HTTP_STATUS.INTERNAL_SERVER_ERROR
+        "Invalid conversation participants",
+        HTTP_STATUS.INTERNAL_SERVER_ERROR
         );
     }
+    }
 
-    const normalizedContent = normalizeText(content);
+    const normalizedContent = content ? normalizeText(content) : "";
 
     const MAX_MESSAGE_LENGTH = 2000;
 
@@ -142,26 +153,91 @@ export const sendMessageService = async(
             HTTP_STATUS.BAD_REQUEST
         )
     }
+
+    let messageType: "TEXT" | "IMAGE" | "VIDEO" = "TEXT";
+    let mediaUrl: string | undefined;
+
+    if (file) {
+        const mime = file.mimetype;
+
+        if (mime.startsWith("image/")) {
+            messageType = "IMAGE";
+        } else if (mime.startsWith("video/")) {
+            messageType = "VIDEO";
+        } else {
+            throw new ApiError(
+            "Unsupported media type",
+            HTTP_STATUS.BAD_REQUEST
+            );
+        }
+
+        mediaUrl = `/uploads/${file.filename}`;
+    }
+    
     const message = await Message.create({
         conversationId: conversation._id,
         sender: currentUserId,
-        receiver: receiverId,
-        content: normalizedContent
+        receiver: receiverId
+            ? new mongoose.Types.ObjectId(receiverId)
+            : undefined,
+        type: messageType,
+        content: normalizedContent || "",
+        mediaUrl
     });
 
+    if (messageType === "TEXT") {
     conversation.lastMessage = normalizedContent;
+    }
+
+    if (messageType === "IMAGE") {
+    conversation.lastMessage = "Image";
+    }
+
+    if (messageType === "VIDEO") {
+    conversation.lastMessage = "Video";
+    }
     conversation.lastMessageSender = new mongoose.Types.ObjectId(
         currentUserId
     );
     conversation.lastMessageAt = new Date();
 
-    const receiverUnreadCount = 
-        conversation.unreadCounts.get(receiverId.toString()) || 0;
-
-    conversation.unreadCounts.set(
-        receiverId.toString(),
-        receiverUnreadCount + 1
+    conversation.unreadBy = conversation.unreadBy.filter(
+        (id) => id.toString() !== currentUserId
     );
+
+    if (conversation.type === "DIRECT" && receiverId) {
+
+    const alreadyUnread = conversation.unreadBy.some(
+        (id) => id.toString() === receiverId!.toString()
+    );
+
+    if (!alreadyUnread) {
+        conversation.unreadBy.push(receiverId);
+    }
+
+    }
+
+    if (conversation.type === "GROUP") {
+
+    conversation.participants.forEach((userId) => {
+
+        const uid = userId.toString();
+
+        if (uid !== currentUserId) {
+
+        const alreadyUnread = conversation.unreadBy.some(
+            (id) => id.toString() === uid
+        );
+
+        if (!alreadyUnread) {
+            conversation.unreadBy.push(userId);
+        }
+
+        }
+
+    });
+
+    }
 
     await conversation.save();
 
@@ -169,6 +245,89 @@ export const sendMessageService = async(
         .populate("sender", "-password")
         .populate("receiver", "-password")
         .orFail();
+
+    const io = getIO();
+
+    const receiverIdString = receiverId!.toString();
+
+    if (isUserOnline(receiverIdString)) {
+        await Message.findByIdAndUpdate(message._id, {
+            delivered: true
+        });
+    }
+
+    if (conversation.type === "DIRECT") {
+
+    const receiverIdString = receiverId!.toString();
+
+    io.to(receiverIdString).emit(
+        "new_message",
+        populatedMessage
+    );
+
+    }
+
+    if (conversation.type === "GROUP") {
+
+        conversation.participants.forEach((userId) => {
+
+            const uid = userId.toString();
+
+            if (uid !== currentUserId) {
+            io.to(uid).emit(
+                "new_message",
+                populatedMessage
+            );
+            }
+
+        });
+
+    }
+
+    io.to(receiverIdString).emit("conversation_updated", {
+        conversationId: conversation._id,
+    });
+
+    io.to(currentUserId).emit("conversation_updated", {
+    conversationId: conversation._id,
+    });
+
+    if (conversation.type === "DIRECT" && receiverId) {
+
+    const receiverIdString = receiverId.toString();
+
+    const unreadData = await getUnreadConversationCountService(
+        receiverIdString
+    );
+
+    io.to(receiverIdString).emit(
+        "unread_count_updated",
+        unreadData
+    );
+
+    }
+
+    if (conversation.type === "GROUP") {
+
+    for (const userId of conversation.participants) {
+
+        const uid = userId.toString();
+
+        if (uid !== currentUserId) {
+
+        const unreadData =
+            await getUnreadConversationCountService(uid);
+
+        io.to(uid).emit(
+            "unread_count_updated",
+            unreadData
+        );
+
+        }
+
+    }
+
+    }
 
     return populatedMessage;
 };
@@ -266,7 +425,10 @@ export const markConversationAsSeenService = async (
         );
     }
 
-    conversation.unreadCounts.set(currentUserId, 0);
+    conversation.unreadBy = conversation.unreadBy.filter(
+        (id) => id.toString() !== currentUserId
+    );
+
     await conversation.save();
 
     await Message.updateMany(
@@ -288,15 +450,17 @@ export const getUnreadConversationCountService = async (
 ) => {
     const conversations = await Conversation.find({
         participants: currentUserId,
-    }).select("unreadCounts");
+    }).select("unreadBy");
 
     let unreadConversationCount = 0;
 
     for (const conversation of conversations) {
-        const unreadCount = conversation.unreadCounts.get(currentUserId) || 0;
+        const hasUnread = conversation.unreadBy.some(
+            (id) => id.toString() === currentUserId
+        );
 
-        if (unreadCount > 0) {
-            unreadConversationCount++;
+        if (hasUnread) {
+            unreadConversationCount++; 
         }
     }
 

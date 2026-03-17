@@ -54,6 +54,8 @@ const NotificationList = () => {
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
+            {tab.label}
+
             {activeTab === tab.value && (
               <div className="absolute left-0 right-0 -bottom-[1px] h-[2px] bg-primary rounded-full" />
             )}
