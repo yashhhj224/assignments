@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { sendMessage } from "../../redux/slices/chatSlice";
 import { IoSend } from "react-icons/io5";
+import { FiPlus } from "react-icons/fi";
+import { getSocket } from "../../socket";
 
 interface Props {
   inputRef: React.RefObject<HTMLTextAreaElement>;
@@ -10,77 +12,145 @@ interface Props {
 
 const MessageInput = ({ inputRef }: Props) => {
   const [text, setText] = useState("");
-  const dispatch = useAppDispatch();
+  const [files, setFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
 
-  const { activeConversationId } =
-    useAppSelector((state) => state.chat);
+  const dispatch = useAppDispatch();
+  const { activeConversationId } = useAppSelector((state) => state.chat);
 
   const handleSend = () => {
-    const message = text.replace(/\s+/g, " ").trim();
+    if (!activeConversationId) return;
 
-    if (!message || !activeConversationId) return;
+    const trimmed = text.trim();
+
+    if (!trimmed && files.length === 0) return;
 
     dispatch(
       sendMessage({
         conversationId: activeConversationId,
-        content: text,
+        content: trimmed,
+        files,
       })
     );
 
     setText("");
+    setFiles([]);
+    setPreviews([]);
 
     if (inputRef.current) {
       inputRef.current.style.height = "auto";
     }
   };
 
-  const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLTextAreaElement>
-  ) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+  const handleFileChange = (fileList: FileList) => {
+    const validFiles: File[] = [];
+    const validPreviews: string[] = [];
+
+    Array.from(fileList).forEach((f) => {
+      if (f.type.startsWith("image/") || f.type.startsWith("video/")) {
+        validFiles.push(f);
+        validPreviews.push(URL.createObjectURL(f));
+      }
+    });
+
+    setFiles(validFiles);
+    setPreviews(validPreviews);
   };
 
   return (
-    <div className="bg-white border-t border-gray-200 px-6 py-4 flex items-end gap-4">
+    <div className="bg-white border-t border-gray-200 px-6 py-4 flex flex-col gap-2">
 
-    <textarea
-      ref={inputRef}
-      value={text}
-      onChange={(e) => {
-        setText(e.target.value);
+      {previews.length > 0 && (
+        <div className="flex gap-2 flex-wrap">
+          {previews.map((p, i) => (
+            <div key={i} className="relative">
+              {files[i]?.type.startsWith("image/") ? (
+                <img src={p} className="w-24 rounded-lg" />
+              ) : (
+                <video src={p} className="w-28 rounded-lg" controls />
+              )}
 
-        const el = e.target;
+              <button
+                onClick={() => {
+                  const newFiles = [...files];
+                  const newPreviews = [...previews];
+                  newFiles.splice(i, 1);
+                  newPreviews.splice(i, 1);
+                  setFiles(newFiles);
+                  setPreviews(newPreviews);
+                }}
+                className="absolute top-1 right-1 bg-black/60 text-white text-xs px-2 rounded"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
-        el.style.height = "auto";
+      <div className="flex items-end gap-4">
 
-        const maxHeight = 150;
+        <label className="cursor-pointer bg-gray-100 p-3 rounded-full hover:bg-gray-200">
+          <FiPlus size={18} />
 
-        if (el.scrollHeight > maxHeight) {
-          el.style.height = maxHeight + "px";
-          el.style.overflowY = "auto";
-        } else {
-          el.style.height = el.scrollHeight + "px";
-          el.style.overflowY = "hidden";
-        }
-      }}
-      onKeyDown={handleKeyDown}
-      placeholder="Type a message..."
-      rows={1}
-      className="flex-1 bg-gray-100 rounded-2xl px-6 py-3 text-sm resize-none
-      focus:outline-none focus:ring-2 focus:ring-primary
-      overflow-y-auto no-scrollbar"
-    />
+          <input
+            type="file"
+            hidden
+            accept="*"
+            multiple
+            onChange={(e) => {
+              if (e.target.files) {
+                handleFileChange(e.target.files);
+              }
+            }}
+          />
+        </label>
 
-      <button
-        onClick={handleSend}
-        className="bg-primary text-white p-3 rounded-full hover:opacity-90 transition flex items-center justify-center"
-      >
-        <IoSend size={18} />
-      </button>
+        <textarea
+          ref={inputRef}
+          value={text}
+          onChange={(e) => {
+            setText(e.target.value);
 
+            const socket = getSocket();
+            if (!socket || !activeConversationId) return;
+
+            socket.emit("typing", {
+              conversationId: activeConversationId,
+            });
+
+            setTimeout(() => {
+              socket.emit("stop_typing", {
+                conversationId: activeConversationId,
+              });
+            }, 1000);
+
+            const el = e.target;
+            el.style.height = "auto";
+
+            const maxHeight = 150;
+
+            if (el.scrollHeight > maxHeight) {
+              el.style.height = maxHeight + "px";
+              el.style.overflowY = "auto";
+            } else {
+              el.style.height = el.scrollHeight + "px";
+              el.style.overflowY = "hidden";
+            }
+          }}
+          placeholder="Type a message..."
+          rows={1}
+          className="flex-1 bg-gray-100 rounded-2xl px-6 py-3 text-sm resize-none
+          focus:outline-none focus:ring-2 focus:ring-primary"
+        />
+
+        <button
+          onClick={handleSend}
+          className="bg-primary text-white p-3 rounded-full hover:opacity-90"
+        >
+          <IoSend size={18} />
+        </button>
+      </div>
     </div>
   );
 };

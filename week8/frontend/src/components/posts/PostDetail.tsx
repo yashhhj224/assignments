@@ -52,6 +52,9 @@ const Content = styled.div`
   margin-top: 20px;
   white-space: pre-wrap;
   color: #374151;
+
+  word-break: break-word;
+  overflow-wrap: anywhere;
 `;
 
 const ImageWrapper = styled.div`

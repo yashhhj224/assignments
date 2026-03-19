@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { fetchAllUsers } from "../redux/slices/usersSlice";
 import FollowersFollowingList from "../components/users/FollowersFollowingList";
+import { fetchMyFollowing } from "../redux/slices/followSlice";
 
 const Container = styled.div`
   background: white;
@@ -72,6 +73,7 @@ const UsersPage = () => {
 
   useEffect(() => {
     dispatch(fetchAllUsers());
+    dispatch(fetchMyFollowing());
   }, [dispatch]);
 
   return (

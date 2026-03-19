@@ -11,10 +11,13 @@ export const createGroupController = asyncHandler(
     const userId = req.userId as string;
     const { name, members } = req.body;
 
+    const avatar = req.file?.path;
+
     const group = await createGroupService(
       userId,
       name,
-      members
+      members,
+      avatar,
     );
 
     successResponse(

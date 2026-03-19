@@ -39,13 +39,13 @@ export const sendMessageController = asyncHandler(
 
     const { conversationId, content } = req.body;
 
-    const file = req.file;
+    const files = req.files as Express.Multer.File[] | undefined;
 
     const message = await sendMessageService(
         currentUserId,
         conversationId,
         content,
-        file
+        files,
     );
 
     successResponse(

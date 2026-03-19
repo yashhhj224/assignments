@@ -15,7 +15,7 @@ const Container = styled.div`
 `;
 
 const PostDetailPage = () => {
-  const { id } = useParams();
+  const { id } = useParams(); 
 
   if (!id) return null;
 

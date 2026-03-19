@@ -1,8 +1,11 @@
 
 import styled from "styled-components";
-import { useAppSelector } from "../../redux/hooks";
+import { useAppSelector, useAppDispatch  } from "../../redux/hooks";
 import UserLink from "../common/UserLink";
 import FollowButton from "../common/FollowButton";
+import { createOrGetConversationApi } from "../../api/chatApi";
+import { addConversation, setActiveConversation } from "../../redux/slices/chatSlice";
+import { useNavigate } from "react-router-dom";
 
 const Wrapper = styled.div`
   background: white;
@@ -39,6 +42,8 @@ const FollowersFollowingList = ({ type, users, filter }: Props) => {
     (state) => state.auth.user
   );
 
+  const allUsers = useAppSelector((state) => state.users.users);
+
   let rawList: any[] = [];
 
   if (type === "all") {
@@ -58,21 +63,56 @@ const FollowersFollowingList = ({ type, users, filter }: Props) => {
 
   if (type === "all" && filter && filter !== "all") {
     if (filter === "followers") {
-      safeList = safeList.filter((u: any) =>
-        currentUser?.followers?.some(
-          (f: any) => f._id === u._id
+
+      const followersIds = allUsers
+        .filter((user: any) =>
+          user.following?.some((f: any) =>
+            typeof f === "string"
+              ? f === currentUser?._id
+              : f?._id === currentUser?._id
+          )
         )
-      );
-    } else {
+        .map((u: any) => u._id);
+
       safeList = safeList.filter((u: any) =>
-        currentUser?.following?.some(
-          (f: any) => f._id === u._id
+        followersIds.includes(u._id)
+      );
+    }
+
+    if (filter === "following") {
+
+      safeList = safeList.filter((u: any) =>
+        currentUser?.following?.some((f: any) =>
+          typeof f === "string"
+            ? f === u._id
+            : f?._id === u._id
         )
       );
     }
   }
 
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const handleMessage = async (userId: string) => {
+    const res = await createOrGetConversationApi(userId);
+
+    if (!res?.data) return;
+
+    dispatch(addConversation(res.data));
+
+    dispatch(
+      setActiveConversation({
+        conversationId: res.data._id,
+        currentUserId: res.data.participants?.[0]?._id,
+      })
+    );
+
+    navigate("/chat");
+  };
+
   return (
+
     <Wrapper>
       {type !== "all" && (
         <TopBar>
@@ -87,7 +127,17 @@ const FollowersFollowingList = ({ type, users, filter }: Props) => {
       {safeList.map((user: any) => (
         <UserRow key={user._id}>
           <UserLink user={user} />
-          <FollowButton userId={user._id} />
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleMessage(user._id)}
+              className="px-3 py-1 rounded-md bg-gray-100 text-sm hover:bg-gray-200 transition"
+            >
+              Message
+            </button>
+
+            <FollowButton userId={user._id} />
+          </div>
         </UserRow>
       ))}
     </Wrapper>

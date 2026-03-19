@@ -4,7 +4,7 @@ import ChatWindow from "./ChatWindow";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { useEffect } from "react";
 import { getSocket } from "../../socket";
-import { receiveMessage, setCurrentUserId } from "../../redux/slices/chatSlice";
+import { receiveMessage, setCurrentUserId, setTyping } from "../../redux/slices/chatSlice";
 
 const ChatLayout = () => {
   const dispatch = useAppDispatch();
@@ -26,6 +26,24 @@ const ChatLayout = () => {
 
     socket.on("new_message", handleNewMessage);
 
+    socket.on("typing", ({ conversationId }) => {
+      dispatch(
+        setTyping({
+          conversationId,
+          isTyping: true,
+        })
+      );
+    });
+
+    socket.on("stop_typing", ({ conversationId }) => {
+      dispatch(
+        setTyping({
+          conversationId,
+          isTyping: false,
+        })
+      );
+    });
+    
     return () => {
       socket.off("new_message", handleNewMessage);
     };

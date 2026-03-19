@@ -5,6 +5,9 @@ import { useState } from "react";
 import Avatar from "../common/Avatar";
 import FollowButton from "../common/FollowButton";
 import EditProfileModal from "./EditProfileModal";
+import { useAppDispatch } from "../../redux/hooks";
+import { createOrGetConversationApi } from "../../api/chatApi";
+import { addConversation, setActiveConversation } from "../../redux/slices/chatSlice";
 
 const Card = styled.div`
   position: relative;
@@ -77,8 +80,28 @@ type Props = {
 };
 
 const ProfileHeader = ({ user, isOwnProfile }: Props) => {
-  const navigate = useNavigate();
+
   const [isEditing, setIsEditing] = useState(false);
+
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const handleMessage = async () => {
+    const res = await createOrGetConversationApi(user._id);
+
+    if (!res?.data) return;
+
+    dispatch(addConversation(res.data));
+
+    dispatch(
+      setActiveConversation({
+        conversationId: res.data._id,
+        currentUserId: res.data.participants?.[0]?._id,
+      })
+    );
+
+    navigate("/chat");
+  };
 
   if (!user) return null;
 
@@ -91,13 +114,22 @@ const ProfileHeader = ({ user, isOwnProfile }: Props) => {
           <Info>
             <UsernameRow>
               <Username>{user.username}</Username>
-                <ActionWrapper>
+                <ActionWrapper className="flex gap-3">
                   {isOwnProfile ? (
                     <EditButton onClick={() => setIsEditing(true)}>
                       Edit Profile
                     </EditButton>
                   ) : (
-                    <FollowButton userId={user._id} />
+                    <>
+                      <FollowButton userId={user._id} />
+
+                      <button
+                        onClick={handleMessage}
+                        className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90 transition"
+                      >
+                        Message
+                      </button>
+                    </>
                   )}
                 </ActionWrapper>
             </UsernameRow>

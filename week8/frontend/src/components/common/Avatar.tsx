@@ -7,9 +7,6 @@ const Image = styled.img<{ size?: number }>`
   height: ${({ size }) => size || 40}px;
   border-radius: 50%;
   object-fit: cover;
-  image-rendering: auto;
-  backface-visibility: hidden;
-  transform: translateZ(0);
 `;
 
 type Props = {
@@ -18,10 +15,15 @@ type Props = {
 };
 
 const Avatar: React.FC<Props> = ({ src, size }) => {
-  const imageSrc =
-    src && src.trim() !== ""
-      ? `http://localhost:5000/${src.replace(/^\/+/, "")}`
-      : DEFAULT_AVATAR;
+  let imageSrc = DEFAULT_AVATAR;
+
+  if (src && src.trim() !== "") {
+    if (src.startsWith("http") || src.startsWith("/")) {
+      imageSrc = src;
+    } else {
+      imageSrc = `http://localhost:5000/${src.replace(/^\/+/, "")}`;
+    }
+  }
 
   return (
     <Image

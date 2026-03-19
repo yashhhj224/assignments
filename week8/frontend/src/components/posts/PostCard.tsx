@@ -15,6 +15,7 @@ const Card = styled.div`
   margin-bottom: 28px;
   transition: all 0.2s ease;
   border: 1px solid #f1f1f1;
+  cursor: pointer;
 
   &:hover {
     box-shadow: 0 12px 28px rgba(0,0,0,0.06);
@@ -45,6 +46,9 @@ const Content = styled.p`
   color: #4b5563;
   line-height: 1.7;
   font-size: 15px;
+
+  word-break: break-word;
+  overflow-wrap: anywhere;
 `;
 
 const ImageWrapper = styled.div`
@@ -108,13 +112,15 @@ const PostCard = ({ post }: Props) => {
       : post.content;
 
   return (
-    <Card>
+    <Card onClick={() => navigate(`/post/${post._id}`)}>
       <Header>
-        <UserLink user={post.author} />
+        <div onClick={(e) => e.stopPropagation()}>
+          <UserLink user={post.author} />
+        </div>
         <MetaTime>{timeAgo(post.createdAt)}</MetaTime>
       </Header>
 
-      <Title onClick={() => navigate(`/post/${post._id}`)}>
+      <Title>
         {post.title}
       </Title>
 
@@ -130,7 +136,10 @@ const PostCard = ({ post }: Props) => {
         <ActionItem>
           <IconWrapper
             $liked={!!post.isLikedByCurrentUser}
-            onClick={() => dispatch(toggleLike(post._id))}
+            onClick={(e) => {
+              e.stopPropagation();
+              dispatch(toggleLike(post._id));
+            }}
           >
             {post.isLikedByCurrentUser ? <FaHeart /> : <FiHeart />}
           </IconWrapper>
@@ -139,9 +148,10 @@ const PostCard = ({ post }: Props) => {
 
         <ActionItem>
           <IconWrapper
-            onClick={() =>
-              navigate(`/post/${post._id}?focus=comment`)
-            }
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/post/${post._id}?focus=comment`);
+            }}
           >
             <FaRegComment />
           </IconWrapper>

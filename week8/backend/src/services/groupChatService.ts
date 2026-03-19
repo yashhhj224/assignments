@@ -8,7 +8,8 @@ import { User } from "../models/User";
 export const createGroupService = async (
   creatorId: string,
   name: string,
-  memberIds: string[]
+  memberIds: string[],
+  avatar?: string,
 ) => {
 
   if (!name || name.trim().length === 0) {
@@ -31,6 +32,23 @@ export const createGroupService = async (
     id => id !== creatorId
   );
 
+  const currentUser = await User.findById(creatorId);
+
+  if (!currentUser) {
+    throw new ApiError("User not found", HTTP_STATUS.NOT_FOUND);
+  }
+
+  const isValid = filteredMembers.every(id =>
+    currentUser.following.some(f => f.toString() === id)
+  );
+
+  if (!isValid) {
+    throw new ApiError(
+      "You can only add users you follow",
+      HTTP_STATUS.BAD_REQUEST
+    );
+  }
+
   const users = await User.find({
     _id: { $in: filteredMembers }
   });
@@ -51,6 +69,7 @@ export const createGroupService = async (
     type: "GROUP",
     groupName: name.trim(),
     groupAdmin: creatorId,
+    groupAvatar: avatar || "",
     participants,
     unreadBy: []
   });
@@ -65,25 +84,43 @@ export const addGroupMemberService = async (
   newMemberId: string
 ) => {
 
+  if (!mongoose.isValidObjectId(newMemberId)) {
+    throw new ApiError("Invalid user id", HTTP_STATUS.BAD_REQUEST);
+  }
+
   const group = await Conversation.findById(groupId);
 
   if (!group || group.type !== "GROUP") {
-    throw new ApiError(
-      "Group not found",
-      HTTP_STATUS.NOT_FOUND
-    );
+    throw new ApiError("Group not found", HTTP_STATUS.NOT_FOUND);
   }
 
-  if (!group.groupAdmin || group.groupAdmin.toString() !== adminId) {
-    throw new ApiError(
-        "Only admin can perform this action",
-        HTTP_STATUS.FORBIDDEN
-    );
+  if (group.groupAdmin?.toString() !== adminId) {
+    throw new ApiError("Only admin can perform this action", HTTP_STATUS.FORBIDDEN);
   }
 
-  if (group.participants.includes(new mongoose.Types.ObjectId(newMemberId))) {
+  const user = await User.findById(newMemberId);
+
+  if (!user) {
+    throw new ApiError("User not found", HTTP_STATUS.NOT_FOUND);
+  }
+
+  const alreadyExists = group.participants.some(
+    id => id.toString() === newMemberId
+  );
+
+  if (alreadyExists) {
+    throw new ApiError("User already in group", HTTP_STATUS.BAD_REQUEST);
+  }
+
+  const adminUser = await User.findById(adminId);
+
+  const isFollowing = adminUser?.following.some(
+    id => id.toString() === newMemberId
+  );
+
+  if (!isFollowing) {
     throw new ApiError(
-      "User already in group",
+      "You can only add users you follow",
       HTTP_STATUS.BAD_REQUEST
     );
   }
@@ -105,20 +142,36 @@ export const removeGroupMemberService = async (
   const group = await Conversation.findById(groupId);
 
   if (!group || group.type !== "GROUP") {
+    throw new ApiError("Group not found", HTTP_STATUS.NOT_FOUND);
+  }
+
+  if (group.groupAdmin?.toString() !== adminId) {
+    throw new ApiError("Only admin can perform this action", HTTP_STATUS.FORBIDDEN);
+  }
+
+  if (memberId === adminId) {
     throw new ApiError(
-      "Group not found",
-      HTTP_STATUS.NOT_FOUND
+      "Admin cannot remove themselves",
+      HTTP_STATUS.BAD_REQUEST
     );
   }
 
-  if (!group.groupAdmin || group.groupAdmin.toString() !== adminId) {
+  const exists = group.participants.some(
+    id => id.toString() === memberId
+  );
+
+  if (!exists) {
     throw new ApiError(
-        "Only admin can perform this action",
-        HTTP_STATUS.FORBIDDEN
+      "User not in group",
+      HTTP_STATUS.BAD_REQUEST
     );
   }
 
   group.participants = group.participants.filter(
+    id => id.toString() !== memberId
+  );
+
+  group.unreadBy = group.unreadBy.filter(
     id => id.toString() !== memberId
   );
 
@@ -161,7 +214,8 @@ export const updateGroupNameService = async (
 
   await group.save();
 
-  return group;
+  return Conversation.findById(groupId)
+    .populate("participants", "-password");
 };
 
 export const leaveGroupService = async (
@@ -172,10 +226,7 @@ export const leaveGroupService = async (
   const group = await Conversation.findById(groupId);
 
   if (!group || group.type !== "GROUP") {
-    throw new ApiError(
-      "Group not found",
-      HTTP_STATUS.NOT_FOUND
-    );
+    throw new ApiError("Group not found", HTTP_STATUS.NOT_FOUND);
   }
 
   const isParticipant = group.participants.some(
@@ -183,15 +234,10 @@ export const leaveGroupService = async (
   );
 
   if (!isParticipant) {
-    throw new ApiError(
-      "User not part of this group",
-      HTTP_STATUS.BAD_REQUEST
-    );
+    throw new ApiError("User not part of this group", HTTP_STATUS.BAD_REQUEST);
   }
 
-  const admin = group.groupAdmin?.toString();
-
-  if (admin === userId) {
+  if (group.groupAdmin?.toString() === userId) {
     throw new ApiError(
       "Admin cannot leave group. Transfer admin first.",
       HTTP_STATUS.BAD_REQUEST
@@ -199,6 +245,10 @@ export const leaveGroupService = async (
   }
 
   group.participants = group.participants.filter(
+    id => id.toString() !== userId
+  );
+
+  group.unreadBy = group.unreadBy.filter(
     id => id.toString() !== userId
   );
 

@@ -74,11 +74,35 @@ export const createOrGetConversationService = async (
     return populatedConversation;
 };
 
+export const getUnreadConversationCountService = async (
+    currentUserId: string
+) => {
+    const conversations = await Conversation.find({
+        participants: currentUserId,
+    }).select("unreadBy");
+
+    let unreadConversationCount = 0;
+
+    for (const conversation of conversations) {
+        const hasUnread = conversation.unreadBy.some(
+            (id) => id.toString() === currentUserId
+        );
+
+        if (hasUnread) {
+            unreadConversationCount++; 
+        }
+    }
+
+    return {
+        unreadConversationCount,
+    };
+};
+
 export const sendMessageService = async (
     currentUserId:string,
     conversationId:string,
     content?:string,
-    file?: Express.Multer.File
+    files?: Express.Multer.File[]
 ) => {
 
     if (!canSendMessage(currentUserId)) {
@@ -154,26 +178,49 @@ export const sendMessageService = async (
         )
     }
 
-    let messageType: "TEXT" | "IMAGE" | "VIDEO" = "TEXT";
-    let mediaUrl: string | undefined;
+    if ((!normalizedContent || normalizedContent === "") && (!files || files.length === 0)) {
+        throw new ApiError(
+            "Message must have text or media",
+            HTTP_STATUS.BAD_REQUEST
+        );
+    }
 
-    if (file) {
+    if (files && files.length > 10) {
+        throw new ApiError(
+            "Max 10 files allowed",
+            HTTP_STATUS.BAD_REQUEST
+        );
+    }
+
+    let messageType: "TEXT" | "MEDIA" = "TEXT";
+
+    let media: { type: "IMAGE" | "VIDEO"; url: string }[] = [];
+
+    if (files && files.length > 0) {
+    files.forEach((file) => {
         const mime = file.mimetype;
 
         if (mime.startsWith("image/")) {
-            messageType = "IMAGE";
+        media.push({
+            type: "IMAGE",
+            url: `/uploads/${file.filename}`
+        });
         } else if (mime.startsWith("video/")) {
-            messageType = "VIDEO";
+        media.push({
+            type: "VIDEO",
+            url: `/uploads/${file.filename}`
+        });
         } else {
-            throw new ApiError(
+        throw new ApiError(
             "Unsupported media type",
             HTTP_STATUS.BAD_REQUEST
-            );
+        );
         }
+    });
 
-        mediaUrl = `/uploads/${file.filename}`;
+    messageType = "MEDIA";
     }
-    
+
     const message = await Message.create({
         conversationId: conversation._id,
         sender: currentUserId,
@@ -182,20 +229,22 @@ export const sendMessageService = async (
             : undefined,
         type: messageType,
         content: normalizedContent || "",
-        mediaUrl
+        media
     });
 
-    if (messageType === "TEXT") {
-    conversation.lastMessage = normalizedContent;
+    if (media.length === 0) {
+        conversation.lastMessage = normalizedContent;
     }
 
-    if (messageType === "IMAGE") {
-    conversation.lastMessage = "Image";
+    if (media.length > 0) {
+        if (media.length === 1) {
+            conversation.lastMessage =
+            media[0].type === "IMAGE" ? "Image" : "Video";
+        } else {
+            conversation.lastMessage = `${media.length} files`;
+        }
     }
 
-    if (messageType === "VIDEO") {
-    conversation.lastMessage = "Video";
-    }
     conversation.lastMessageSender = new mongoose.Types.ObjectId(
         currentUserId
     );
@@ -248,23 +297,29 @@ export const sendMessageService = async (
 
     const io = getIO();
 
-    const receiverIdString = receiverId!.toString();
+    if (conversation.type === "DIRECT" && receiverId) {
+        const receiverIdString = receiverId.toString();
 
-    if (isUserOnline(receiverIdString)) {
-        await Message.findByIdAndUpdate(message._id, {
+        if (isUserOnline(receiverIdString)) {
+            await Message.findByIdAndUpdate(message._id, {
             delivered: true
-        });
+            });
+        }
+
+        io.to(receiverIdString).emit("new_message", populatedMessage);
     }
 
-    if (conversation.type === "DIRECT") {
+    if (conversation.type === "GROUP") {
+        for (const userId of conversation.participants) {
+            const uid = userId.toString();
 
-    const receiverIdString = receiverId!.toString();
-
-    io.to(receiverIdString).emit(
-        "new_message",
-        populatedMessage
-    );
-
+            if (uid !== currentUserId && isUserOnline(uid)) {
+            await Message.findByIdAndUpdate(message._id, {
+                delivered: true,
+            });
+            break; 
+            }
+        }
     }
 
     if (conversation.type === "GROUP") {
@@ -284,48 +339,64 @@ export const sendMessageService = async (
 
     }
 
-    io.to(receiverIdString).emit("conversation_updated", {
+    io.to(currentUserId).emit("conversation_updated", {
         conversationId: conversation._id,
     });
 
-    io.to(currentUserId).emit("conversation_updated", {
-    conversationId: conversation._id,
-    });
+    if (conversation.type === "DIRECT" && receiverId) {
+        const receiverIdString = receiverId.toString();
+
+        io.to(receiverIdString).emit("conversation_updated", {
+            conversationId: conversation._id,
+        });
+    }
+
+    if (conversation.type === "GROUP") {
+        conversation.participants.forEach((userId) => {
+            const uid = userId.toString();
+
+            if (uid !== currentUserId) {
+            io.to(uid).emit("conversation_updated", {
+                conversationId: conversation._id,
+            });
+            }
+        });
+    }
 
     if (conversation.type === "DIRECT" && receiverId) {
 
-    const receiverIdString = receiverId.toString();
+        const receiverIdString = receiverId.toString();
 
-    const unreadData = await getUnreadConversationCountService(
-        receiverIdString
-    );
+        const unreadData = await getUnreadConversationCountService(
+            receiverIdString
+        );
 
-    io.to(receiverIdString).emit(
-        "unread_count_updated",
-        unreadData
-    );
+        io.to(receiverIdString).emit(
+            "unread_count_updated",
+            unreadData
+        );
 
     }
 
     if (conversation.type === "GROUP") {
 
-    for (const userId of conversation.participants) {
+        for (const userId of conversation.participants) {
 
-        const uid = userId.toString();
+            const uid = userId.toString();
 
-        if (uid !== currentUserId) {
+            if (uid !== currentUserId) {
 
-        const unreadData =
-            await getUnreadConversationCountService(uid);
+            const unreadData =
+                await getUnreadConversationCountService(uid);
 
-        io.to(uid).emit(
-            "unread_count_updated",
-            unreadData
-        );
+            io.to(uid).emit(
+                "unread_count_updated",
+                unreadData
+            );
+
+            }
 
         }
-
-    }
 
     }
 
@@ -442,29 +513,5 @@ export const markConversationAsSeenService = async (
 
     return {
         success: true,
-    };
-};
-
-export const getUnreadConversationCountService = async (
-    currentUserId: string
-) => {
-    const conversations = await Conversation.find({
-        participants: currentUserId,
-    }).select("unreadBy");
-
-    let unreadConversationCount = 0;
-
-    for (const conversation of conversations) {
-        const hasUnread = conversation.unreadBy.some(
-            (id) => id.toString() === currentUserId
-        );
-
-        if (hasUnread) {
-            unreadConversationCount++; 
-        }
-    }
-
-    return {
-        unreadConversationCount,
     };
 };

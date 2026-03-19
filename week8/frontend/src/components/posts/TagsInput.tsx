@@ -5,14 +5,17 @@ import { useState } from "react";
 const Wrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
+  border: 1px solid #e5e7eb;
+  padding: 10px;
+  border-radius: 12px;
 `;
 
 const Tag = styled.div`
   background: #eef2ff;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 14px;
+  padding: 6px 10px;
+  border-radius: 14px;
+  font-size: 13px;
 `;
 
 const Input = styled.input`

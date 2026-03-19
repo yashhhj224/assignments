@@ -54,7 +54,7 @@ export const fetchNotifications = createAsyncThunk(
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      return data.data;
+      return data.data.notifications || data.data;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }

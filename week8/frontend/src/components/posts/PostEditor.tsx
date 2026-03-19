@@ -9,11 +9,12 @@ import ImageUploader from "./ImageUploader";
 import { VALIDATION_RULES } from "../../constants/validation";
 
 const Wrapper = styled.div`
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 360px;
-  gap: 36px;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+  align-items: start;
 
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
@@ -24,6 +25,10 @@ const Wrapper = styled.div`
 const Left = styled.div`
   display: flex;
   flex-direction: column;
+  background: white;
+  padding: 28px;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.05);
 `;
 
 const Right = styled.div`
@@ -38,42 +43,43 @@ const Right = styled.div`
 
 const TitleInput = styled.input`
   width: 100%;
-  font-size: 30px;
+  font-size: 32px;
   font-weight: 700;
-  padding: 18px 22px;
-  border-radius: 18px;
+  padding: 18px 20px;
+  border-radius: 16px;
   border: 1px solid #e5e7eb;
   outline: none;
   transition: all 0.2s ease;
-  background: white;
+
+  &::placeholder {
+    color: #94a3b8;
+  }
 
   &:focus {
     border-color: #6366f1;
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
   }
 `;
 
 const TextArea = styled.textarea`
   width: 100%;
-  min-height: 380px;
-  margin-top: 20px;
-  padding: 22px;
+  min-height: 360px;
+  margin-top: 18px;
+  padding: 20px;
   font-size: 16px;
-  line-height: 1.6;
-  border-radius: 20px;
+  line-height: 1.7;
+  border-radius: 16px;
   border: 1px solid #e5e7eb;
   resize: none;
   outline: none;
-  transition: all 0.2s ease;
-  background: white;
+
+  &::placeholder {
+    color: #94a3b8;
+  }
 
   &:focus {
     border-color: #6366f1;
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-  }
-  
-  @media (max-width: 768px) {
-    min-height: 280px;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
   }
 `;
 
@@ -85,40 +91,26 @@ const ErrorText = styled.div`
 
 const Panel = styled.div`
   background: white;
-  padding: 24px;
-  border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
-  width: 300px;
-
-  @media (max-width: 1024px) {
-    width: 100%;
-  }
+  padding: 22px;
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.05);
 `;
 
 const PostButton = styled.button`
   padding: 16px;
   border: none;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #4338ca, #6366f1);
+  border-radius: 14px;
+  background: linear-gradient(135deg,#4338ca,#6366f1);
   color: white;
   font-weight: 700;
   font-size: 15px;
   cursor: pointer;
-  box-shadow: 0 10px 22px rgba(67, 56, 202, 0.25);
+  width: 100%;
   transition: all 0.2s ease;
-  width: 300px;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 14px 28px rgba(67, 56, 202, 0.3);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-
-  @media (max-width: 1024px) {
-    width: 100%;
+    box-shadow: 0 12px 24px rgba(67,56,202,0.35);
   }
 `;
 

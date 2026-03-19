@@ -17,7 +17,6 @@ const NotificationsPage = () => {
   return (
     <div className="bg-white rounded-2xl shadow-sm p-8 max-w-4xl mx-auto">
 
-      {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-2xl font-semibold">
           Notifications

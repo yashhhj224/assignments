@@ -58,6 +58,12 @@ io.on("connection", (socket) => {
 
   socket.join(userId);
 
+  socket.on("join_groups", (groupIds: string[]) => {
+    groupIds.forEach((groupId) => {
+      socket.join(groupId);
+    });
+  });
+
   addOnlineUser(userId, socket.id);
 
   socket.on("typing", ({ receiverId }) => {

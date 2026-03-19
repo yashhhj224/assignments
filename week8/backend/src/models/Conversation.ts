@@ -1,4 +1,5 @@
 
+
 import { Schema, model, Document, Types } from "mongoose";
 
 export type ConversationType = "DIRECT" | "GROUP";
@@ -46,7 +47,8 @@ const conversationSchema = new Schema<IConversation>(
     },
 
     groupAvatar: {
-      type: String
+      type: String,
+      default: "",
     },
 
     groupAdmin: {
@@ -56,9 +58,6 @@ const conversationSchema = new Schema<IConversation>(
 
     conversationKey: {
       type: String,
-      unique: true,
-      sparse: true,
-      index: true,
     },
 
     lastMessage: {
@@ -102,7 +101,17 @@ conversationSchema.pre<IConversation>("validate", function () {
 
 });
 
-conversationSchema.index({ lastMessageAt: -1 });
+conversationSchema.index({ participants: 1, lastMessageAt: -1 });
+
+conversationSchema.index(
+  { conversationKey: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      conversationKey: { $type: "string" }
+    }
+  }
+);
 
 export const Conversation = model<IConversation>(
   "Conversation",

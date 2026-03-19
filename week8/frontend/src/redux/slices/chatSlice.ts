@@ -1,6 +1,7 @@
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
+  createGroupApi,
   fetchConversationsApi,
   fetchMessagesApi,
   sendMessageApi,
@@ -9,32 +10,52 @@ import {
 export interface Message {
   _id: string;
   conversationId: string;
+
   sender: {
     _id: string;
     username: string;
     profilePic?: string;
   };
+
   receiver: {
     _id: string;
     username: string;
     profilePic?: string;
   };
+
+  type: "TEXT" | "MEDIA";
+
   content: string;
+
+  media?: {
+    type: "IMAGE" | "VIDEO";
+    url: string;
+  }[];
+
   createdAt: string;
 }
 
 export interface Conversation {
   _id: string;
+
   participants: {
     _id: string;
     username: string;
     profilePic?: string;
     isOnline?: boolean;
   }[];
+
+  type: "DIRECT" | "GROUP";
+
+  groupName?: string;
+  groupAvatar?: string;
+  groupAdmin?: string;
+
   lastMessage?: string;
+  lastMessageSender?: string;
   lastMessageAt?: string;
-  lastReadMessageIds?: Record<string, string>;
-  unreadCounts?: Record<string, number>;
+
+  unreadBy?: string[];
 }
 
 export const fetchConversations = createAsyncThunk(
@@ -61,11 +82,29 @@ export const sendMessage = createAsyncThunk(
   async ({
     conversationId,
     content,
+    files,
   }: {
     conversationId: string;
     content: string;
+    files?: File[];
   }) => {
-    const data = await sendMessageApi(conversationId, content);
+    const data = await sendMessageApi(conversationId, content, files);
+    return data.data;
+  }
+);
+
+export const createGroup = createAsyncThunk(
+  "chat/createGroup",
+  async ({
+    name,
+    memberIds,
+    avatar,
+  }: {
+    name: string;
+    memberIds: string[];
+    avatar?: File | null;
+  }) => {
+    const data = await createGroupApi(name, memberIds, avatar);
     return data.data;
   }
 );
@@ -76,6 +115,7 @@ interface ChatState {
   activeConversationId: string | null;
   onlineUsers: string[];
   currentUserId: string | null;
+  typingUsers: Record<string, boolean>;
 }
 
 const initialState: ChatState = {
@@ -84,6 +124,7 @@ const initialState: ChatState = {
   activeConversationId: null,
   onlineUsers: [],
   currentUserId: null,
+  typingUsers: {},
 };
 
 const chatSlice = createSlice({
@@ -123,10 +164,6 @@ const chatSlice = createSlice({
 
       const conv = state.conversations[index];
 
-      if (!conv.lastReadMessageIds) {
-        conv.lastReadMessageIds = {};
-      }
-
       const currentUserId = state.currentUserId;
 
       const isIncoming =
@@ -136,10 +173,22 @@ const chatSlice = createSlice({
       const isChatOpen =
         state.activeConversationId === convId;
 
-      if (isIncoming && isChatOpen) {
-        conv.lastReadMessageIds[currentUserId] = message._id;
-      }
+      if (conv && currentUserId) {
+        if (isIncoming && isChatOpen) {
+          conv.unreadBy = conv.unreadBy?.filter(
+            (id) => id !== currentUserId
+          );
+        }
 
+        if (!isIncoming) {
+          const receiverId = message.receiver?._id;
+
+          if (receiverId && !conv.unreadBy?.includes(receiverId)) {
+            conv.unreadBy = [...(conv.unreadBy || []), receiverId];
+          }
+        }
+      }
+      
       const updatedConv = {
         ...conv,
         lastMessage: message.content,
@@ -165,6 +214,17 @@ const chatSlice = createSlice({
     setOnlineUsers(state, action) {
       state.onlineUsers = action.payload;
     },
+
+    setTyping(state, action) {
+      const { conversationId, userId, isTyping } = action.payload;
+
+      if (!state.typingUsers[conversationId]) {
+        state.typingUsers[conversationId] = false;
+      }
+
+      state.typingUsers[conversationId] = isTyping;
+    },
+
   },
 
   extraReducers: (builder) => {
@@ -188,14 +248,11 @@ const chatSlice = createSlice({
           messages.length > 0 &&
           state.activeConversationId === conversationId
         ) {
-          const lastMessage = messages[messages.length - 1];
-
-          if (!conv.lastReadMessageIds) {
-            conv.lastReadMessageIds = {};
+          if (conv && state.currentUserId) {
+            conv.unreadBy = conv.unreadBy?.filter(
+              (id) => id !== state.currentUserId
+            );
           }
-
-          conv.lastReadMessageIds[state.currentUserId] =
-            lastMessage._id;
         }
       })
 
@@ -229,6 +286,18 @@ const chatSlice = createSlice({
           state.conversations.splice(index, 1);
           state.conversations.unshift(updatedConv);
         }
+      })
+
+      .addCase(createGroup.fulfilled, (state, action) => {
+        if (!action.payload) return; 
+
+        const exists = state.conversations.some(
+          (c) => c._id === action.payload._id
+        );
+
+        if (!exists) {
+          state.conversations.unshift(action.payload);
+        }
       });
   },
 });
@@ -239,6 +308,7 @@ export const {
   receiveMessage,
   addConversation,
   setOnlineUsers,
+  setTyping,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

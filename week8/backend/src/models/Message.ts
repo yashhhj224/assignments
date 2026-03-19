@@ -1,17 +1,21 @@
 
 import mongoose, { Schema, Document } from "mongoose";
 
-export type MessageType = "TEXT" | "IMAGE" | "VIDEO";
+export type MessageType = "TEXT" | "MEDIA";
 
 export interface IMessage extends Document {
   conversationId: mongoose.Types.ObjectId;
   sender: mongoose.Types.ObjectId;
-  receiver: mongoose.Types.ObjectId;
+  receiver?: mongoose.Types.ObjectId;
 
   type: MessageType;
 
   content?: string;
-  mediaUrl?: string;
+
+  media: {
+    type: "IMAGE" | "VIDEO";
+    url: string;
+  }[];
 
   delivered: boolean;
   seen: boolean;
@@ -44,17 +48,30 @@ const messageSchema = new Schema<IMessage>(
 
   type: {
     type: String,
-    enum: ["TEXT", "IMAGE", "VIDEO"],
+    enum: ["TEXT", "MEDIA"],
     default: "TEXT"
   },
-  
-  content:{
-    type:String,
-    trim:true
+
+  content: {
+    type: String,
+    trim: true
   },
 
-  mediaUrl:{
-    type:String
+  media: {
+    type: [
+      {
+        type: {
+          type: String,
+          enum: ["IMAGE", "VIDEO"],
+          required: true
+        },
+        url: {
+          type: String,
+          required: true
+        }
+      }
+    ],
+    default: []
   },
 
   delivered:{
@@ -76,8 +93,18 @@ const messageSchema = new Schema<IMessage>(
 {timestamps:true}
 );
 
+messageSchema.pre<IMessage>("validate", function () {
+  if (
+    (!this.content || this.content.trim().length === 0) &&
+    (!this.media || this.media.length === 0)
+  ) {
+    throw new Error("Message must have text or media");
+  }
+});
+
 messageSchema.index({ conversationId: 1, createdAt: -1 });
 messageSchema.index({ receiver: 1, seen: 1 });
+messageSchema.index({ sender: 1 });
 
 export const Message = mongoose.model<IMessage>(
   "Message",

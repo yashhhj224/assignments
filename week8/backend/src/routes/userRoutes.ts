@@ -9,7 +9,7 @@ import {
   changePasswordController,
   searchUsersController
 } from "../controllers/userController";
-import { upload } from "../middlewares/uploadMiddleware";
+import { upload } from "../config/multer";
 
 const router = Router();
 

@@ -28,21 +28,30 @@ export const getNotificationsService = async (
   limit: number = 20
 ) => {
   const safeLimit = limit < 1 ? 20 : limit > 50 ? 50 : limit;
-
   const safePage = page < 1 ? 1 : page;
 
   const skip = (safePage - 1) * safeLimit;
 
-  const notifications = await Notification.find({
-    user: userId,
-  })
-    .populate("sender", "-password")
-    .populate("postId")
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(safeLimit);
+  const [notifications, total] = await Promise.all([
+    Notification.find({ user: userId })
+      .populate("sender", "-password")
+      .populate("postId")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(safeLimit),
 
-  return notifications;
+    Notification.countDocuments({ user: userId })
+  ]);
+
+  return {
+    notifications,
+    pagination: {
+      page: safePage,
+      limit: safeLimit,
+      total,
+      hasMore: skip + notifications.length < total
+    }
+  };
 };
 
 export const markAllNotificationsReadService = async(

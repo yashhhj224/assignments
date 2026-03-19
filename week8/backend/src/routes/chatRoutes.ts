@@ -34,7 +34,7 @@ router.get(
 router.post(
     "/chat/messages",
     authMiddleware,
-    upload.single("media"),
+    upload.array("media", 10),
     sendMessageController
 );
 

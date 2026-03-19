@@ -86,24 +86,11 @@ const Sidebar = () => {
     (state) => state.chat
   );
 
-  const unreadConversationCount = conversations.filter((conv) => {
-    const lastReadId = conv.lastReadMessageIds?.[currentUserId ?? ""];
-
-    const convMsgs = messages?.[conv._id] ?? [];
-
-    if (!lastReadId) return false;
-
-    const lastReadMsg = convMsgs.find((m) => m._id === lastReadId);
-    if (!lastReadMsg) return false;
-
-    const hasUnread = convMsgs.some(
-      (m) =>
-        new Date(m.createdAt) > new Date(lastReadMsg.createdAt) &&
-        m.receiver._id === currentUserId
-    );
-
-    return hasUnread;
-  }).length;
+  const unreadConversationCount = conversations.filter(
+    (conv) =>
+      currentUserId &&
+      conv.unreadBy?.includes(currentUserId)
+  ).length;
 
   useEffect(() => {
     if (user?._id) {

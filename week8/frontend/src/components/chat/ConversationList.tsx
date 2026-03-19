@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import {
@@ -6,6 +5,7 @@ import {
   setActiveConversation,
 } from "../../redux/slices/chatSlice";
 import Avatar from "../common/Avatar";
+import CreateGroupModal from "./CreateGroupModal";
 
 const ConversationList = () => {
   const dispatch = useAppDispatch();
@@ -14,12 +14,12 @@ const ConversationList = () => {
     conversations,
     activeConversationId,
     onlineUsers,
-    messages,
   } = useAppSelector((state) => state.chat);
 
   const currentUser = useAppSelector((state) => state.auth.user);
 
   const [search, setSearch] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     dispatch(fetchConversations());
@@ -28,64 +28,72 @@ const ConversationList = () => {
   const filtered = conversations.filter((conv) => {
     const userId = currentUser?._id || currentUser?.id;
 
-    const otherUser = conv.participants.find(
-      (p) => String(p._id) !== String(userId)
-    );
+    const isGroup = conv.type === "GROUP";
 
-    return otherUser?.username
-      ?.toLowerCase()
-      .includes(search.toLowerCase());
+    const otherUser = isGroup
+      ? null
+      : conv.participants.find(
+          (p) => String(p._id) !== String(userId)
+        );
+
+    const name = isGroup
+      ? conv.groupName
+      : otherUser?.username;
+
+    return name?.toLowerCase().includes(search.toLowerCase());
   });
 
   return (
     <>
-      <div className="h-[75px] px-5 flex items-center border-b border-gray-200 bg-white">
+      <div className="h-[75px] px-5 flex items-center border-b border-gray-200 bg-white gap-3">
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search conversations..."
-          className="w-full bg-gray-100 px-4 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          className="flex-1 bg-gray-100 px-4 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary"
         />
+
+        <button
+          onClick={() => setShowModal(true)}
+          className="text-sm bg-primary text-white px-3 py-2 rounded-lg"
+        >
+          + Group
+        </button>
       </div>
+
+      {showModal && (
+        <CreateGroupModal onClose={() => setShowModal(false)} />
+      )}
 
       <div className="flex-1 overflow-y-auto hide-scrollbar">
         {filtered.map((conv) => {
           const userId = currentUser?._id || currentUser?.id;
 
-          const otherUser = conv.participants.find(
-            (p) => String(p._id) !== String(userId)
-          );
-          if (!otherUser) return null;
+          const isGroup = conv.type === "GROUP";
+
+          const otherUser = isGroup
+            ? null
+            : conv.participants.find(
+                (p) => String(p._id) !== String(userId)
+              );
+
+          if (!isGroup && !otherUser) return null;
 
           const isActive =
             activeConversationId === conv._id;
 
-          const isOnline = onlineUsers.includes(
-            otherUser._id.toString()
-          );
+          const otherUserId = otherUser?._id?.toString();
 
-          const lastReadId =
-            conv.lastReadMessageIds?.[currentUser?._id ?? ""];
+          const isOnline =
+            !isGroup &&
+            !!otherUserId &&
+            onlineUsers.includes(otherUserId);
 
-          const conversationMsgs =
-            messages?.[conv._id] ?? [];
+          const hasUnread =
+            currentUser &&
+            conv.unreadBy?.includes(currentUser._id);
 
-          const unreadCount = lastReadId
-            ? conversationMsgs.filter((m) => {
-                const lastReadMsg = conversationMsgs.find(
-                  (x) => x._id === lastReadId
-                );
-
-                if (!lastReadMsg) return false;
-
-                return (
-                  new Date(m.createdAt) > new Date(lastReadMsg.createdAt) &&
-                  m.receiver._id === currentUser?._id
-                );
-              }).length
-            : 0;
-
-          const hasUnread = unreadCount > 0;
+          const unreadCount = hasUnread ? 1 : 0;
 
           return (
             <div
@@ -109,9 +117,15 @@ const ConversationList = () => {
               }`}
             >
               <div className="relative">
-                <Avatar src={otherUser.profilePic} size={42} />
+                <Avatar
+                  src={
+                    isGroup
+                      ? conv.groupAvatar || "/default-group-avatar.png"
+                      : otherUser?.profilePic
+                  }
+                />
 
-                {isOnline && (
+                {!isGroup && isOnline && (
                   <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
                 )}
               </div>
@@ -124,7 +138,9 @@ const ConversationList = () => {
                       : "text-gray-900"
                   }`}
                 >
-                  {otherUser.username}
+                  {isGroup
+                    ? conv.groupName
+                    : otherUser?.username}
                 </div>
 
                 <div
