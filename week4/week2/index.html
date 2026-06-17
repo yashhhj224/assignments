@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Company Portal</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <div class="authWrapper">
+
+        <div id="loginBox" class="authCard">
+            <h2 class="authTitle">Welcome Back</h2>
+            <input id="loginUsername" class="authInput" type="text" placeholder="Username (min 4 chars)" autocomplete="off">
+            <input id="loginPassword" class="authInput" type="password" placeholder="Password (min 6 chars)" autocomplete="off">
+            <button id="loginBtn" class="authBtn">Login</button>
+            <p class="redirectText">Not registered? <span id="goRegister" class="redirectLink">Register</span></p>
+        </div>
+
+        <div id="registerBox" class="authCard hidden">
+            <h2 class="authTitle">Create Account</h2>
+            <input id="regUsername" class="authInput" type="text" placeholder="Username (min 4 and max 12 chars)">
+            <input id="regPassword" class="authInput" type="password" placeholder="Password (min 6 and max 10 chars)">
+            <button id="registerBtn" class="authBtn">Register</button>
+            <p class="redirectText">Already registered? <span id="goLogin" class="redirectLink">Login</span></p>
+        </div>
+
+    </div>
+
+    <script src="js/auth.js"></script>
+</body>
+</html>
